@@ -23,6 +23,8 @@ export class TutorialScene extends Scene {
     
     this.resource_manager = resource_manager;
 
+    this.static_objects = [];
+
     this.initialize_scene();
     this.initialize_actor_actions();
   }
@@ -39,11 +41,19 @@ export class TutorialScene extends Scene {
       color: [1.0, 1.0, 0.9]
     });
 
-    this.objects.push({
-      position: [0.0, 0.0, 0.0],
-      scale:[5.0, 5.0, 5.0],
-      material: MATERIALS.fish,
-    })
+    this.lights.push({
+      position : [0.0 , 2.0, 2.5],
+      color: [1.0, 1.0, 0.9]
+    });
+
+    this.static_objects.push({
+      translation: [0.0, 0.0, 0.0],
+      scale:[0.50, 0.50, 0.50],
+      mesh_reference: 'fish.obj',
+      material: MATERIALS.fish
+    });
+
+    this.objects = this.static_objects;
 
   }
 
