@@ -10,6 +10,7 @@ import {
 } from "../cg_libraries/cg_web.js";
 import { Scene } from "./scene.js";
 import { ResourceManager } from "../scene_resources/resource_manager.js";
+import { Material } from "../../lib/webgl-obj-loader_2.0.8/webgl-obj-loader.module.js";
 
 export class TutorialScene extends Scene {
 
@@ -37,6 +38,12 @@ export class TutorialScene extends Scene {
       position : [0.0 , -2.0, 2.5],
       color: [1.0, 1.0, 0.9]
     });
+
+    this.objects.push({
+      position: [0.0, 0.0, 0.0],
+      scale:[5.0, 5.0, 5.0],
+      material: MATERIALS.fish,
+    })
 
   }
 
