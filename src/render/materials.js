@@ -97,6 +97,11 @@ export const gray = new DiffuseMaterial({
     shininess: 0.5
 });
 
+export const sand = new DiffuseMaterial({
+    color:[0.95, 0.85, 0.5],
+    shininess: 0.8
+});
+
 export const gold = new DiffuseMaterial({
     texture: 'tex_gold',
     shininess: 14.0

@@ -1,4 +1,3 @@
-
 import { TurntableCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
 import { cg_mesh_make_uv_sphere } from "../cg_libraries/cg_mesh.js"
@@ -37,28 +36,27 @@ export class DemoScene extends Scene {
 
     // Add lights
     this.lights.push({
-      position : [-4,-5,7],
-      color: [0.75, 0.53, 0.45]
-    });
-    this.lights.push({
-      position : [6,4,6],
-      color: [0.0, 0.0, 0.3]
+      position : [0,0,25],
+      color: [0.75, 0.75, 0.75]
     });
     
-    // Add a procedurally generated mesh
+    
+    
+    const width = 100;
+    const height = 100;
+
+    // Compute base perlin/FBM noise
     const height_map = this.procedural_texture_generator.compute_texture(
       "perlin_heightmap", 
       noise_functions.FBM_for_terrain, 
-      {width: 96, height: 96, mouse_offset: [-12.24, 8.15]}
+      { width, height, mouse_offset: [-12.24, 8.15] }
     );
-    this.WATER_LEVEL = -0.03125;
-    this.TERRAIN_SCALE = [10,10,10];
+   
+    this.WATER_LEVEL = -0.5;
+    this.TERRAIN_SCALE = [10, 10, 2];
     const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
-
-    // Add some meshes dynamically - see more functions below
-    place_random_trees(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, this.WATER_LEVEL);
 
     // Add some meshes to the static objects list
     this.static_objects.push({
@@ -72,7 +70,7 @@ export class DemoScene extends Scene {
       translation: [0, 0, 0],
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
-      material: MATERIALS.terrain
+      material: MATERIALS.sand
     });
 
     // Combine the dynamic & static objects into one array

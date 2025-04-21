@@ -19,7 +19,7 @@ import { ProceduralTextureGenerator } from "./render/procedural_texture_generato
 // Scenes
 import { TutorialScene } from "./scenes/tutorial_scene.js";
 import { DemoScene } from "./scenes/demo_scene.js";
-// import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
+import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 
 DOM_loaded_promise.then(main)
 

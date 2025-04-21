@@ -1,5 +1,6 @@
 
 import {vec2, vec3, vec4, mat2, mat3, mat4} from "../../lib/gl-matrix_3.3.0/esm/index.js"
+import { DendryNoise } from "./dendry_noise.js";
 
 /**
  * Generate procedurally a terrain mesh using some procedural noise
@@ -12,6 +13,19 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 	const grid_width = height_map.width;
 	const grid_height = height_map.height;
 
+	const controlFunc = (x,y) => {
+		return height_map.get(x|0,y|0);
+	};
+
+	const dendry_noise = new DendryNoise(grid_width, grid_height, {
+		levels: 5,     	        
+		epsilon: 0.,          
+		delta: 0.001,           
+		gridSize: 1,           
+		controlFunc: () => 0.1, 
+		beta: 100
+	});
+
 	const vertices = [];
 	const normals = [];
 	const faces = [];
@@ -21,18 +35,14 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 		return x + y*grid_width;
 	}
 
-	for(let gy = 0; gy < grid_height; gy++) {
-		for(let gx = 0; gx < grid_width; gx++) {
-			const idx = xy_to_v_index(gx, gy);
-			let elevation = height_map.get(gx, gy) - 0.5; // we put the value between 0...1 so that it could be stored in a non-float texture on older browsers/GLES3, the -0.5 brings it back to -0.5 ... 0.5
+	for(let y = 0; y < grid_height; y++) {
+		for(let x = 0; x < grid_width; x++) {
+			const idx = xy_to_v_index(x, y);
 
-			// normal as finite difference of the height map
-			// dz/dx = (h(x+dx) - h(x-dx)) / (2 dx)
-			normals[idx] = vec3.normalize([0, 0, 0], [
-				-(height_map.get(gx+1, gy) - height_map.get(gx-1, gy)) / (2. / grid_width),
-				-(height_map.get(gx, gy+1) - height_map.get(gx, gy-1)) / (2. / grid_height),
-				1.,
-			]);
+			let h0 = height_map.get(x,y) - 0.5;
+			let d = dendry_noise.eval(x,y) / Math.max(grid_width, grid_height);
+			let elevation = (h0 + 0.5*(1-d));			
+			
 
 			/*
 			Generate the displaced terrain vertex corresponding to integer grid location (gx, gy). 
@@ -43,19 +53,30 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 	
 			The XY coordinates are calculated so that the full grid covers the square [-0.5, 0.5]^2 in the XY plane.
 			*/
-
-			const vx = 1.0/grid_width * gx -0.5;
-			const vy = 1.0/grid_height * gy -0.5;
-			let vz = 0.;
-			if (elevation <= WATER_LEVEL) {
-				vz = WATER_LEVEL;
-				normals[idx] = [0,0,1];
+			const hx = ((() => {
+				let h1 = height_map.get(x+1,y)-0.5;
+				let d1 = dendry_noise.eval(x+1,y)/Math.max(grid_width,grid_height);
+				let h2 = height_map.get(x-1,y)-0.5;
+				let d2 = dendry_noise.eval(x-1,y)/Math.max(grid_width,grid_height)
+				return ((h1 + 0.5*(1-d1)) - (h2 + 0.5*(1-d2))) / (2/grid_width);
+			})());
+			const hy = ((() => {
+				let h1 = height_map.get(x,y+1)-0.5;
+				let d1 = dendry_noise.eval(x,y+1)/Math.max(grid_width,grid_height);
+				let h2 = height_map.get(x,y-1)-0.5;
+				let d2 = dendry_noise.eval(x,y-1)/Math.max(grid_width,grid_height);
+				return ((h1 + 0.5*(1-d1)) - (h2 + 0.5*(1-d2))) / (2/grid_height);
+			})());
+			normals[idx] = vec3.normalize([0,0,0], [ -hx, -hy, 1 ]);
+			if (elevation < WATER_LEVEL) {
+				elevation = WATER_LEVEL;
+				normals[idx] = vec3.normalize([0,0,0], [0, 0, 1]); // Water surface normal
 			}
-			else{
-				vz = elevation;
-			}
+			
+			const vx = x/grid_width - 0.5;
+			const vy = y/grid_height - 0.5;
 
-			vertices[idx] = [vx, vy, vz];
+			vertices[idx] = [vx, vy, elevation];
 		}
 	}
 
