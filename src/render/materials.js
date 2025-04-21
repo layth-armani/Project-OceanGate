@@ -28,7 +28,7 @@ class Material {
 
 }
 
-class BackgroundMaterial extends Material {
+export class BackgroundMaterial extends Material {
 
     constructor({texture = default_texture}){
         super()
@@ -81,6 +81,16 @@ class TerrainMaterial extends Material {
     }
 }
 
+export class NoiseMaterial extends Material {
+
+    constructor({texture = null}){
+        super()
+        this.texture = texture;
+        this.color = default_base_color;
+        this.shininess = default_shininess; 
+    }
+}
+
 /*---------------------------------------------------------------
 	Material Instantiation
 ---------------------------------------------------------------*/
@@ -97,7 +107,7 @@ export const gray = new DiffuseMaterial({
     shininess: 0.5
 });
 
-export const sand = new DiffuseMaterial({
+export const ochre = new DiffuseMaterial({
     color:[0.95, 0.85, 0.5],
     shininess: 0.8
 });

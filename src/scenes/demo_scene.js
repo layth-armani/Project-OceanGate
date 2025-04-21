@@ -5,9 +5,9 @@ import { terrain_build_mesh } from "../scene_resources/terrain_generation.js"
 import { noise_functions } from "../render/shader_renderers/noise_sr.js"
 import { Scene } from "./scene.js"
 import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
-import { create_button, create_slider, create_hotkey_action } from "../cg_libraries/cg_web.js"
+import { create_button, create_slider, create_hotkey_action, load_texture } from "../cg_libraries/cg_web.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js"
-import { ProceduralTextureGenerator } from "../render/procedural_texture_generator.js"
+import { ProceduralTextureGenerator} from "../render/procedural_texture_generator.js"
 
 
 export class DemoScene extends Scene {
@@ -40,10 +40,21 @@ export class DemoScene extends Scene {
       color: [0.75, 0.75, 0.75]
     });
     
-    
-    
     const width = 100;
     const height = 100;
+
+    const texture = this.procedural_texture_generator.compute_texture(
+      "sand", 
+      noise_functions.Sand,
+      {mouse_offset: [-12.24, 8.15],
+        zoom_factor: 1.,
+        width: width,
+        height: height,
+        ret_buffer: false
+      }
+    );
+    console.log(texture)
+        
 
     // Compute base perlin/FBM noise
     const height_map = this.procedural_texture_generator.compute_texture(
@@ -66,11 +77,12 @@ export class DemoScene extends Scene {
       material: MATERIALS.sunset_sky
     });
 
+
     this.static_objects.push({
       translation: [0, 0, 0],
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
-      material: MATERIALS.sand
+      material: new MATERIALS.NoiseMaterial(texture) 
     });
 
     // Combine the dynamic & static objects into one array

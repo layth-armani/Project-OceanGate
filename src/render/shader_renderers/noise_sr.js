@@ -11,6 +11,7 @@ export const noise_functions = {
     Turbulence: "tex_turbulence",
     Map: "tex_map",
     Wood: "tex_wood",
+    Sand: "tex_sand",
     FBM_for_terrain: "tex_fbm_for_terrain"
 };
 

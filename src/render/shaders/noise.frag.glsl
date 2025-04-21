@@ -325,3 +325,30 @@ vec3 tex_marble(vec2 point) {
 }
 
 
+// ==============================================================
+// Procedural "sand" texture
+
+// ...existing code...
+
+// ==============================================================
+// Procedural "sand" texture
+
+// Define sand colors
+const vec3 sand_color_light = vec3(0.95, 0.85, 0.65); // Light beige/yellow
+const vec3 sand_color_dark  = vec3(0.75, 0.65, 0.45); // Slightly darker brown/beige
+
+vec3 tex_sand(vec2 point) {
+    float base_noise = perlin_fbm(point * 2.0); 
+    base_noise = (base_noise + 1.0) * 0.5; 
+
+    vec3 base_color = mix(sand_color_dark, sand_color_light, base_noise);
+
+    float grain_noise = turbulence(point * 60.0); 
+    grain_noise = grain_noise * 0.08; 
+
+    vec3 final_color = base_color + vec3(grain_noise);
+
+    return clamp(final_color, 0.0, 1.0);
+}
+
+
