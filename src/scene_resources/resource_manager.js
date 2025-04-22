@@ -137,6 +137,7 @@ export class ResourceManager{
         return [
             'kloppenheim_07_puresky_blur.jpg',
             'pine.png',
+            'fish.png'
           ];
     }
 
@@ -158,6 +159,7 @@ export class ResourceManager{
     meshes_to_load() {
         return [
         "pine.obj",
+        "fish.obj"
       ];
     }
 

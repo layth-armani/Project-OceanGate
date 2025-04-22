@@ -112,3 +112,8 @@ export const terrain = new TerrainMaterial({
     grass_color: [0.33, 0.43, 0.18],
     peak_color: [0.8, 0.5, 0.4]
 });
+
+export const fish = new DiffuseMaterial({
+    texture: 'fish.png'
+});
+
