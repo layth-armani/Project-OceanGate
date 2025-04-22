@@ -71,7 +71,25 @@ export class TutorialScene extends Scene {
    */
   initialize_ui_params(){
 
-    // TODO
+    const n_steps_slider = 100;
+
+    create_slider(
+      "movement speed", 
+      [0, n_steps_slider], 
+      (i) => {
+        const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
+        this.camera.setMovSpeed(new_speed);
+      }
+    )
+
+    create_slider(
+      "sensitivity",
+      [0, n_steps_slider], 
+      (i) => {
+        const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
+        this.camera.setRotSensitivity(new_sens);
+      }
+    )
 
   }
 
