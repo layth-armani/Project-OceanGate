@@ -1,6 +1,6 @@
 import {vec3, vec4, mat3, mat4} from "../../lib/gl-matrix_3.3.0/esm/index.js"
 // import {cg_mesh_make_cube} from "./cg_mesh.js"
-import { TurntableCamera } from "../scene_resources/camera.js"
+import { POVCamera } from "../scene_resources/camera.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js"
 
 /**
@@ -148,7 +148,7 @@ export class EnvironmentCapture {
 
 		// create a new camera object to which we set the projection matrix to 
 		// be the one created earlier in this class
-		const cube_camera = new TurntableCamera();
+		const cube_camera = new POVCamera();
 		cube_camera.mat.projection = this.cube_camera_projection;
 
 		// override the scene camera with special camera for cube map rendering

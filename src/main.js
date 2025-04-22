@@ -40,6 +40,7 @@ async function main() {
 
   // The <canvas> object (HTML element for drawing graphics) was created by REGL: we take a handle to it
   const canvas_elem = document.getElementsByTagName('canvas')[0]
+  canvas_elem.tabIndex = 1;
   {
     // Resize canvas to fit the window
     function resize_canvas() {
@@ -89,9 +90,36 @@ async function main() {
     }
   })
 
-  // zoom
-  canvas_elem.addEventListener('wheel', (event) => {
-    active_scene.camera.zoom_action(event.deltaY);
+  const keysDown = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  };
+  const forwardKeys = ['W', 'w', 'ArrowUp'];
+  const backwardKeys = ['S', 's', 'ArrowDown'];
+  const leftKeys = ['A', 'a', 'ArrowLeft'];
+  const rightKeys = ['D', 'd', 'ArrowRight'];
+  const upKeys = [' '];
+  const downKeys = ['Shift'];
+
+  canvas_elem.addEventListener('keydown', (event) => {
+    if (forwardKeys.includes(event.key)) keysDown['forward'] = true;
+    if (backwardKeys.includes(event.key)) keysDown['backward'] = true;
+    if (leftKeys.includes(event.key)) keysDown['left'] = true;
+    if (rightKeys.includes(event.key)) keysDown['right'] = true;
+    if (upKeys.includes(event.key)) keysDown['up'] = true;
+    if (downKeys.includes(event.key)) keysDown['down'] = true;
+  })
+  canvas_elem.addEventListener('keyup', (event) => {
+    if (forwardKeys.includes(event.key)) keysDown['forward'] = false;
+    if (backwardKeys.includes(event.key)) keysDown['backward'] = false;
+    if (leftKeys.includes(event.key)) keysDown['left'] = false;
+    if (rightKeys.includes(event.key)) keysDown['right'] = false;
+    if (upKeys.includes(event.key)) keysDown['up'] = false;
+    if (downKeys.includes(event.key)) keysDown['down'] = false;
   })
 
   /*---------------------------------------------------------------
@@ -132,6 +160,16 @@ async function main() {
     // Reset canvas
     const background_color = [0.0, 0.0, 0.0, 1];
     regl.clear({ color: background_color });
+
+    /*---------------------------------------------------------------
+      Update the camera position
+    ---------------------------------------------------------------*/
+
+    active_scene.camera.move_action(
+      (keysDown['forward'] ? 1 : 0) - (keysDown['backward'] ? 1 : 0),
+      (keysDown['right'] ? 1 : 0) - (keysDown['left'] ? 1 : 0),
+      (keysDown['up'] ? 1 : 0) - (keysDown['down'] ? 1 : 0)
+    );
     
     /*---------------------------------------------------------------
       Update the current frame data

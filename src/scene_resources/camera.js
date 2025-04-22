@@ -1,17 +1,22 @@
 import { vec2, vec3, vec4, mat3, mat4 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
+import { normalize } from "../../lib/gl-matrix_3.3.0/esm/vec3.js"
 import { deg_to_rad, mat4_to_string, vec_to_string, mat4_matmul_many } from "../cg_libraries/cg_math.js"
 
 /**
- * Create a new turntable camera
+ * Create a new point of view camera
  */
-export class TurntableCamera {
+export class POVCamera {
+
+    MAX_MOV_SPEED = 0.1;
+    MIN_MOV_SPEED = 0.01;
+    MAX_ROT_SENSITIVITY = 0.02;
+    MIN_ROT_SENSITIVITY = 0.001;
 
     constructor() {
-        this.angle_z = Math.PI * 0.2; // in radians!
-        this.angle_y = -Math.PI / 6; // in radians!
-        this.distance_factor = 1.;
-        this.distance_base = 15.;
-        this.look_at = [0, 0, 0];
+        this.pos = [0, 0, 0]
+        this.look_dir = [1, 0, 0]
+        this.rotation_sensitivity = this.MIN_ROT_SENSITIVITY;
+        this.movement_speed = this.MIN_MOV_SPEED;
         
         this.mat = {
             projection : mat4.create(),
@@ -21,6 +26,70 @@ export class TurntableCamera {
         this.update_format_ratio(100, 100);
         this.update_cam_transform();
         
+    }
+
+    getMovSpeed(){
+        return this.movement_speed;
+    }
+
+    setMovSpeed(speed){
+        if(speed > this.MAX_MOV_SPEED){
+            this.movement_speed = this.MAX_MOV_SPEED;
+        } else if(speed < this.MIN_MOV_SPEED){
+            this.movement_speed = this.MIN_MOV_SPEED;
+        } else{
+            this.movement_speed = speed;
+        }
+    }
+
+    getRotSensitivity(){
+        return this.rotation_sensitivity;
+    }
+
+    setRotSensitivity(sensitivity){
+        if(sensitivity > this.MAX_ROT_SENSITIVITY){
+            this.rotation_sensitivity = this.MAX_ROT_SENSITIVITY;
+        } else if(sensitivity < this.MIN_ROT_SENSITIVITY){
+            this.rotation_sensitivity = this.MIN_ROT_SENSITIVITY;
+        } else{
+            this.rotation_sensitivity = sensitivity;
+        }
+    }
+
+    get_right_v(){
+        const look = vec3.clone(this.look_dir);
+
+        const right_unit_v = vec3.create();
+        vec3.cross(
+            right_unit_v,
+            look,
+            vec3.fromValues(0, 0, 1)
+        )
+        normalize(right_unit_v, right_unit_v);
+
+        return right_unit_v;
+    }
+
+    get_up_v(){
+        const look = vec3.clone(this.look_dir);
+
+        const right_unit_v = vec3.create();
+        vec3.cross(
+            right_unit_v,
+            look,
+            vec3.fromValues(0, 0, -1)
+        )
+
+        const up_unit_v = vec3.create();
+        vec3.cross(
+            up_unit_v,
+            look,
+            right_unit_v
+        )
+
+        normalize(up_unit_v, up_unit_v);
+
+        return up_unit_v;
     }
 
     /**
@@ -41,17 +110,11 @@ export class TurntableCamera {
      * Recompute the view matrix (mat.view)
      */
     update_cam_transform() {
-        const r = this.distance_base * this.distance_factor;
-
-        const M_look_forward_X = mat4.lookAt(mat4.create(),
-            [-r, 0, 0], // camera position in world coord
-            this.look_at, // view target point
+        mat4.lookAt(this.mat.view,
+            this.pos, // camera position in world coord
+            mat3.add(mat3.create(), this.pos, this.look_dir), // view target point
             [0, 0, 1], // up vector
         )
-        
-        const M_rot_y = mat4.fromYRotation(mat4.create(), this.angle_y)
-        const M_rot_z = mat4.fromZRotation(mat4.create(), this.angle_z)
-        mat4_matmul_many(this.mat.view, M_look_forward_X, M_rot_y, M_rot_z);
     }
 
     /**
@@ -127,24 +190,9 @@ export class TurntableCamera {
      */
     log_current_state(){
         console.log(
-            "distance_factor: " + this.distance_factor,
-            "angle_z: " + this.angle_z,
-            "angle_y: " + this.angle_y,
-            "look_at " + this.look_at,
+            "pos: " + this.pos,
+            "lookdir: " + this.look_dir,
         );
-    }
-
-    /**
-     * Update the camera distance_factor to produce a zoom in / zoom out effect
-     * @param {*} deltaY the variation
-     */
-    zoom_action(deltaY){
-        const factor_mul_base = 1.18;
-        const factor_mul = (deltaY > 0) ? factor_mul_base : 1. / factor_mul_base;
-        this.distance_factor *= factor_mul;
-        this.distance_factor = Math.max(0.02, Math.min(this.distance_factor, 4));
-
-        this.update_cam_transform();
     }
 
     /**
@@ -153,36 +201,81 @@ export class TurntableCamera {
      * @param {*} movementY 
      */
     rotate_action(movementX, movementY){
-        this.angle_z += movementX * 0.003;
-        this.angle_y += -movementY * 0.003;
+        // update the look_dir
+        const factor_mul = -1 * this.rotation_sensitivity;
+        const dx = movementX * factor_mul;
+        const dy = movementY * factor_mul;
+        const MAX_VERTICAL_ANGLE = Math.PI / 2 - 0.01;
+        const MIN_VERTICAL_ANGLE = -Math.PI / 2 + 0.01;
+
+        const flatLookDir = vec3.create();
+        vec3.set(flatLookDir, this.look_dir[0], this.look_dir[1], 0);
+        // angle returned by vec3.angle is in absolute value
+        const upAngle = vec3.angle(flatLookDir, this.look_dir) * Math.sign(this.look_dir[2]);
+
+
+        // rotate around z axis (right/left rotation)
+        vec3.rotateZ(this.look_dir, this.look_dir, vec3.zero(vec3.create()), dx);
+
+        // rotate around right hand axis using rodrigues formula (up/down rotation)
+        if(Math.abs(upAngle + dy) < MAX_VERTICAL_ANGLE){
+            let rotAxis = vec3.normalize(vec3.create(), this.get_right_v());
+            let look = vec3.clone(this.look_dir);
+            let factor1 = vec3.scale(vec3.create(), look, Math.cos(dy));
+            vec3.copy(look, this.look_dir);
+            let factor2 = vec3.scale(vec3.create(), 
+                vec3.cross(vec3.create(), rotAxis, look), 
+                Math.sin(dy)
+            );
+            vec3.copy(look, this.look_dir);
+            let factor3 = vec3.scale(vec3.create(), 
+                rotAxis, 
+                vec3.dot(rotAxis, look) * (1 - Math.cos(dy))
+            );
+            vec3.add(this.look_dir, factor1, factor2);
+            vec3.add(this.look_dir, this.look_dir, factor3);
+        }
+        
+        //vec3.rotateY(this.look_dir, this.look_dir, vec3.zero(vec3.create()), dy);
+
+
+        vec3.normalize(this.look_dir, this.look_dir);
 
         this.update_cam_transform();
     }
 
     /**
      * Moves the camera look_at point
-     * @param {*} movementX 
-     * @param {*} movementY 
+     * @param {*} forward_mov
+     * @param {*} right_mov
+     * @param {*} up_mov 
      */
-    move_action(movementX, movementY){
-        const scaleFactor = this.distance_base * this.distance_factor * 0.0005; // Adjust movement speed 
+    move_action(forward_mov, right_mov, up_mov){
+        if(forward_mov == 0 && right_mov == 0 && up_mov == 0){
+            return;
+        }
+        forward_mov = forward_mov * this.movement_speed;
+        right_mov = right_mov * this.movement_speed;
+        up_mov = up_mov * this.movement_speed;
 
-        const right = [
-            Math.sin(this.angle_z),
-            Math.cos(this.angle_z),
-            0
-        ];
+        const look = vec3.clone(this.look_dir);
 
-        const up = [
-            -Math.cos(this.angle_z) * Math.sin(this.angle_y),
-            Math.sin(this.angle_z) * Math.sin(this.angle_y),
-            Math.cos(this.angle_y)
-        ];
+        const forward_unit_v = look;
+        const right_unit_v = this.get_right_v();
+        const up_unit_v = this.get_up_v();
 
-        this.look_at[0] += right[0] * movementX * scaleFactor + up[0] * movementY * scaleFactor;
-        this.look_at[1] += right[1] * movementX * scaleFactor + up[1] * movementY * scaleFactor;
-        this.look_at[2] += up[2] * movementY * scaleFactor;
+        const result_mov = vec3.create();
+        
 
+        const forward_mov_v = vec3.scale(forward_unit_v, forward_unit_v, forward_mov);
+        const right_mov_v = vec3.scale(right_unit_v, right_unit_v, right_mov);
+        const up_mov_v = vec3.scale(up_unit_v, up_unit_v, up_mov);
+
+
+        vec3.add(result_mov, forward_mov_v, right_mov_v);
+        vec3.add(result_mov, result_mov, up_mov_v);
+
+        vec3.add(this.pos, this.pos, result_mov);
         this.update_cam_transform();
     }
 }

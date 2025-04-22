@@ -1,6 +1,6 @@
 
 
-import { TurntableCamera } from "../scene_resources/camera.js"
+import { POVCamera } from "../scene_resources/camera.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js";
 
 
@@ -19,8 +19,8 @@ export class Scene {
     // A set of key-value pairs, each entry represents an object that evolves with time
     this.actors = {};
     
-    // Camera, turntable by default
-    this.camera = new TurntableCamera();
+    // Camera
+    this.camera = new POVCamera();
 
     // Ambient light coefficient
     this.ambient_factor = 0.3;

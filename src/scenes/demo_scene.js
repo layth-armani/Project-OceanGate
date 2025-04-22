@@ -1,5 +1,5 @@
 
-import { TurntableCamera } from "../scene_resources/camera.js"
+import { POVCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
 import { cg_mesh_make_uv_sphere } from "../cg_libraries/cg_mesh.js"
 import { terrain_build_mesh } from "../scene_resources/terrain_generation.js"
@@ -145,6 +145,25 @@ export class DemoScene extends Scene {
     create_slider("Height light 2 ", [0, n_steps_slider], (i) => {
       this.ui_params.light_height[1] = min_light_height_2 + i * (max_light_height_2 - min_light_height_2) / n_steps_slider;
     });
+
+    create_slider(
+      "movement speed", 
+      [0, 100], 
+      (i) => {
+        const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
+        this.camera.setMovSpeed(new_speed);
+      }
+    )
+
+    create_slider(
+      "sensitivity",
+      [0, 100], 
+      (i) => {
+        const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
+        this.camera.setRotSensitivity(new_sens);
+      }
+    )
+    
 
     // Add button to generate random terrain
     create_button("Random terrain", () => {this.random_terrain()});
