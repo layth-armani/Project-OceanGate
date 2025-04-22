@@ -17,6 +17,8 @@ export class POVCamera {
         this.look_dir = [1, 0, 0]
         this.rotation_sensitivity = this.MIN_ROT_SENSITIVITY;
         this.movement_speed = this.MIN_MOV_SPEED;
+
+        this.animation = null;
         
         this.mat = {
             projection : mat4.create(),
@@ -26,6 +28,38 @@ export class POVCamera {
         this.update_format_ratio(100, 100);
         this.update_cam_transform();
         
+    }
+
+    set_pos(pos){
+        this.pos = vec3.clone(pos);
+        this.update_cam_transform();
+    }
+
+    set_look_dir(look_dir){
+        this.look_dir = vec3.clone(look_dir);
+        vec3.normalize(this.look_dir, this.look_dir);
+        this.update_cam_transform();
+    }
+
+    set_animation(animation){
+        this.animation = animation;
+    }
+
+    is_animation_ongoing(){
+        return this.animation != null;
+    }
+
+    animate(dt){
+        
+        if(this.animation){
+            if(this.animation.is_animation_finished()){
+                this.animation = null;
+            } else {
+                const {pos, look} = this.animation.update(dt);
+                this.set_pos(pos);
+                this.set_look_dir(look);
+            }
+        }
     }
 
     getMovSpeed(){

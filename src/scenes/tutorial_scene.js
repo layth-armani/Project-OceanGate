@@ -10,6 +10,8 @@ import {
 import { Scene } from "./scene.js";
 import { ResourceManager } from "../scene_resources/resource_manager.js";
 import { Material } from "../../lib/webgl-obj-loader_2.0.8/webgl-obj-loader.module.js";
+import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js";
+import { BezierCamAnimation } from "../scene_resources/bezier_cam_animation.js";
 
 export class TutorialScene extends Scene {
 
@@ -90,6 +92,26 @@ export class TutorialScene extends Scene {
         this.camera.setRotSensitivity(new_sens);
       }
     )
+
+    create_hotkey_action("Bezier Animation", "o", () => {
+      this.camera.set_animation(
+        new BezierCamAnimation(
+          [
+            vec3.fromValues(-5.36, 2.36, 1.49),
+            vec3.fromValues(-4.07, -4.59, 4.88),
+            vec3.fromValues(6.55, -5.20, -0.60),
+            vec3.fromValues(6.65, -1.86, -1.16)
+          ],
+          [
+            vec3.fromValues(0.87, -0.39, -0.30),
+            vec3.fromValues(0.48, 0.56, -0.67),
+            vec3.fromValues(-0.63, 0.50, -0.60),
+            vec3.fromValues(-0.92, 0.29, 0.27)
+          ],
+          5
+        )
+      )
+    });
 
   }
 

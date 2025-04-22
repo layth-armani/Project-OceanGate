@@ -166,11 +166,16 @@ async function main() {
       Update the camera position
     ---------------------------------------------------------------*/
 
-    active_scene.camera.move_action(
-      (keysDown['forward'] ? 1 : 0) - (keysDown['backward'] ? 1 : 0),
-      (keysDown['right'] ? 1 : 0) - (keysDown['left'] ? 1 : 0),
-      (keysDown['up'] ? 1 : 0) - (keysDown['down'] ? 1 : 0)
-    );
+    if(active_scene.camera.is_animation_ongoing()){
+      active_scene.camera.animate(dt);
+    }else{
+      active_scene.camera.move_action(
+        (keysDown['forward'] ? 1 : 0) - (keysDown['backward'] ? 1 : 0),
+        (keysDown['right'] ? 1 : 0) - (keysDown['left'] ? 1 : 0),
+        (keysDown['up'] ? 1 : 0) - (keysDown['down'] ? 1 : 0)
+      );
+    }
+    
     
     /*---------------------------------------------------------------
       Update the current frame data
