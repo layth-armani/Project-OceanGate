@@ -59,7 +59,7 @@ export class ProceduralTextureGenerator {
      * optional additional parameters to parametrize the computation of the noise
      * @returns 
      */
-    compute_texture(name, function_type, {mouse_offset = [0, 0], zoom_factor = 1.0, width = 256, height = 256, ret_buffer = false}){
+    compute_texture(name, function_type, {mouse_offset = [0, 0], zoom_factor = 1.0, width = 256, height = 256, as_texture = false}){
         
         // Create a new buffer in which we will generate the texture
         const buffer = this.new_buffer();
@@ -75,10 +75,16 @@ export class ProceduralTextureGenerator {
             zoom_factor,
             vec2.negate([0, 0], mouse_offset),
         )
-        if (ret_buffer) return buffer.color[0];
         // Convert the buffer to an array of float data that can be queried
         const texture = buffer_to_data_array(this.regl, buffer)
-        this.resource_manager.resources[name] = texture;
+        if (as_texture) this.resource_manager.resources[name] = this.regl.texture({
+            width: width,
+            height: height,
+            data: texture.data, // Float32Array
+            format: 'rgba',
+            type: 'float'
+          });
+        else this.resource_manager.resources[name] = texture;
         return texture;
     }
 

@@ -43,18 +43,27 @@ export class DemoScene extends Scene {
     const width = 100;
     const height = 100;
 
-    const texture = this.procedural_texture_generator.compute_texture(
+    this.procedural_texture_generator.compute_texture(
       "sand", 
       noise_functions.Sand,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
         width: width,
         height: height,
-        ret_buffer: false
+        as_texture: true
       }
     );
-    console.log(texture)
-        
+
+    this.procedural_texture_generator.compute_texture(
+      "deep_sea", 
+      noise_functions.DeepSea,
+      {mouse_offset: [-12.24, 8.15],
+        zoom_factor: 1.,
+        width: width*100,
+        height: height*100,
+        as_texture: true
+      }
+    );
 
     // Compute base perlin/FBM noise
     const height_map = this.procedural_texture_generator.compute_texture(
@@ -62,9 +71,9 @@ export class DemoScene extends Scene {
       noise_functions.FBM_for_terrain, 
       { width, height, mouse_offset: [-12.24, 8.15] }
     );
-   
+    
     this.WATER_LEVEL = -0.5;
-    this.TERRAIN_SCALE = [10, 10, 2];
+    this.TERRAIN_SCALE = [100, 100, 20];
     const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
@@ -72,17 +81,18 @@ export class DemoScene extends Scene {
     // Add some meshes to the static objects list
     this.static_objects.push({
       translation: [0, 0, 0],
-      scale: [80., 80., 80.],
+      scale: [100., 100., 100.],
       mesh_reference: 'mesh_sphere_env_map',
-      material: MATERIALS.sunset_sky
+      material: MATERIALS.fromTexDiffuseMaterial('deep_sea')
     });
 
+    console.log("79: ",this.resource_manager.get('deep_sea'))
 
     this.static_objects.push({
-      translation: [0, 0, 0],
+      translation: [0, 0, -20],
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
-      material: new MATERIALS.NoiseMaterial(texture) 
+      material: MATERIALS.fromTexDiffuseMaterial('sand')
     });
 
     // Combine the dynamic & static objects into one array

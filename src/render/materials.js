@@ -1,4 +1,3 @@
-
 const default_texture = null; 
 const default_base_color = [1.0, 0.0, 1.0];  // magenta, used when no texture is provided
 const default_shininess = 0.1;
@@ -28,7 +27,7 @@ class Material {
 
 }
 
-export class BackgroundMaterial extends Material {
+class BackgroundMaterial extends Material {
 
     constructor({texture = default_texture}){
         super()
@@ -81,15 +80,6 @@ class TerrainMaterial extends Material {
     }
 }
 
-export class NoiseMaterial extends Material {
-
-    constructor({texture = null}){
-        super()
-        this.texture = texture;
-        this.color = default_base_color;
-        this.shininess = default_shininess; 
-    }
-}
 
 /*---------------------------------------------------------------
 	Material Instantiation
@@ -127,3 +117,9 @@ export const terrain = new TerrainMaterial({
     grass_color: [0.33, 0.43, 0.18],
     peak_color: [0.8, 0.5, 0.4]
 });
+
+export function fromTexDiffuseMaterial(texture = default_texture){
+    return new DiffuseMaterial({
+        texture: texture
+    });
+}

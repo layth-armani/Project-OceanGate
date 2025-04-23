@@ -325,30 +325,55 @@ vec3 tex_marble(vec2 point) {
 }
 
 
-// ==============================================================
-// Procedural "sand" texture
-
-// ...existing code...
 
 // ==============================================================
 // Procedural "sand" texture
-
-// Define sand colors
-const vec3 sand_color_light = vec3(0.95, 0.85, 0.65); // Light beige/yellow
-const vec3 sand_color_dark  = vec3(0.75, 0.65, 0.45); // Slightly darker brown/beige
-
 vec3 tex_sand(vec2 point) {
-    float base_noise = perlin_fbm(point * 2.0); 
-    base_noise = (base_noise + 1.0) * 0.5; 
+    float h = perlin_fbm(point);  
+    h = (h + 1.0) * 0.5;                
 
-    vec3 base_color = mix(sand_color_dark, sand_color_light, base_noise);
+    vec3 base_color;
+    if (h < 0.2) {
+        base_color = vec3(0.75, 0.65, 0.55); 
+    } else if (h < 0.4) {
+        base_color = vec3(0.85, 0.75, 0.55);
+    } else if (h < 0.6) {
+        base_color = vec3(0.95, 0.85, 0.65); 
+    } else if (h < 0.8) {
+        base_color = vec3(0.90, 0.78, 0.60); 
+    } else {
+        base_color = vec3(0.98, 0.92, 0.75);
+    }
 
-    float grain_noise = turbulence(point * 60.0); 
-    grain_noise = grain_noise * 0.08; 
+    float grain = pow(turbulence(point * 20.0), 3.0) * 0.25;
+	grain = smoothstep(0.4, 0.7, grain); 
 
-    vec3 final_color = base_color + vec3(grain_noise);
+    float speckle = fract(sin(dot(point * 40.0, vec2(12.9898, 78.233))) * 43758.5453);
+    speckle = step(0.8, speckle);
+    vec3 speckle_color = vec3(1.0, 0.98, 0.9) * speckle * 0.6;
 
+    vec3 final_color = base_color + vec3(grain) + speckle_color;
     return clamp(final_color, 0.0, 1.0);
 }
 
+// ==============================================================
+// Procedural "deep sea" texture
+vec3 tex_deep_sea(vec2 point) {
+    vec3 deep_color = vec3(0.0, 0.2, 0.4); 
+    vec3 shallow_color = vec3(0.0, 0.6, 0.8); 
+
+    float noise = perlin_fbm(point * 5.0);
+    noise = (noise + 1.0) * 0.5; 
+
+    // Add turbulence for dynamic effects
+    float turbulence_effect = turbulence(point * 10.0) * 0.2;   
+
+    float intensity = clamp(noise + turbulence_effect, 0.0, 1.0);
+
+    vec3 color = mix(deep_color, shallow_color, intensity);
+
+    color *= 1.5; 
+
+    return clamp(color, 0.0, 1.0);
+}
 
