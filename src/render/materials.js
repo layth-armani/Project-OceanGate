@@ -42,7 +42,7 @@ class DiffuseMaterial extends Material {
     constructor({
         texture = null, 
         color = default_base_color, 
-        shininess = default_shininess
+        shininess = default_shininess,
     }){
         super()
         this.texture = texture;
@@ -60,20 +60,16 @@ class ReflectiveMaterial extends Material {
 
 class TerrainMaterial extends Material {
     constructor({
-        water_color = [0.29, 0.51, 0.62],
-        water_shininess = 30.,
-        grass_color = [0.33, 0.43, 0.18],
-        grass_shininess = 5.,
-        peak_color = [0.9, 0.9, 0.9],
-        peak_shininess = 10.
+        texture = null, 
+        color = default_base_color, 
+        shininess = default_shininess,
+        normal_map = null
     }){
         super()
-        this.water_color = water_color;
-        this.water_shininess = water_shininess;
-        this.grass_color = grass_color 
-        this.grass_shininess = grass_shininess;
-        this.peak_color = peak_color;
-        this.peak_shininess = peak_shininess;
+        this.texture = texture;
+        this.color = color;
+        this.shininess = shininess;
+        this.normal_map = normal_map;
 
         this.properties.push("terrain");
         this.properties.push("no_blinn_phong");
@@ -112,14 +108,16 @@ export const pine = new DiffuseMaterial({
     shininess: 0.5
 });
 
-export const terrain = new TerrainMaterial({
-    water_color: [0.29, 0.51, 0.62],
-    grass_color: [0.33, 0.43, 0.18],
-    peak_color: [0.8, 0.5, 0.4]
-});
 
-export function fromTexDiffuseMaterial(texture = default_texture){
+export function terrain(texture = default_texture, normal_map = null) {
+    return new TerrainMaterial({
+        texture: texture,
+        normal_map: normal_map
+    });
+}
+
+export function diffuse(texture = default_texture) {
     return new DiffuseMaterial({
-        texture: texture
+        texture: texture,
     });
 }

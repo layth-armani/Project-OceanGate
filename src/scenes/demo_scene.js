@@ -65,6 +65,18 @@ export class DemoScene extends Scene {
       }
     );
 
+    this.procedural_texture_generator.compute_texture(
+      "normal_map", 
+      noise_functions.Dune,
+      {mouse_offset: [-12.24, 8.15],
+        zoom_factor: 0.1,
+        width: width,  
+        height: height,
+        as_texture: true
+      }
+    );
+
+
     // Compute base perlin/FBM noise
     const height_map = this.procedural_texture_generator.compute_texture(
       "perlin_heightmap", 
@@ -73,7 +85,7 @@ export class DemoScene extends Scene {
     );
     
     this.WATER_LEVEL = -0.5;
-    this.TERRAIN_SCALE = [100, 100, 20];
+    this.TERRAIN_SCALE = [200, 200, 20];
     const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
@@ -83,16 +95,14 @@ export class DemoScene extends Scene {
       translation: [0, 0, 0],
       scale: [100., 100., 100.],
       mesh_reference: 'mesh_sphere_env_map',
-      material: MATERIALS.fromTexDiffuseMaterial('deep_sea')
+      material: MATERIALS.diffuse('deep_sea')
     });
-
-    console.log("79: ",this.resource_manager.get('deep_sea'))
 
     this.static_objects.push({
       translation: [0, 0, -20],
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
-      material: MATERIALS.fromTexDiffuseMaterial('sand')
+      material: MATERIALS.terrain('sand', null)
     });
 
     // Combine the dynamic & static objects into one array

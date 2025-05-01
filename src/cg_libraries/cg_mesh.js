@@ -171,7 +171,7 @@ export function mesh_upload_to_buffer(regl, mesh) {
 
 	
 	// Some of these fields may be null or undefined
-	for(const name of ['vertex_positions', 'vertex_normals', 'vertex_tex_coords', 'vertex_colors']) {
+	for(const name of ['vertex_positions', 'vertex_normals', 'vertex_tex_coords', 'vertex_colors', 'vertex_tangents', 'vertex_binormals' ]) {
 		const vertex_data = mesh[name];
 		if(vertex_data) {
 			mesh_buffers[name] = regl.buffer(vertex_data);

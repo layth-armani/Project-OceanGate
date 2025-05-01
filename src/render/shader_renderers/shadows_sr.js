@@ -71,9 +71,10 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
 
                     cube_shadowmap: cube_shadowmap,
                 });
+                this.pipeline(inputs);
             }
 
-            this.pipeline(inputs);
+                
         });
     }
 

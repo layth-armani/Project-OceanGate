@@ -1,4 +1,3 @@
-
 import {vec2, vec3, vec4, mat2, mat3, mat4} from "../../lib/gl-matrix_3.3.0/esm/index.js"
 import { DendryNoise } from "./dendry_noise.js";
 
@@ -28,6 +27,9 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 
 	const vertices = [];
 	const normals = [];
+	const tangents = []; 
+	const binormals = []; 
+	const tex_coords = [];
 	const faces = [];
 
 	// Map a 2D grid index (x, y) into a 1D index into the output vertex array.
@@ -58,6 +60,7 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 				let d1 = dendry_noise.eval(x+1,y)/Math.max(grid_width,grid_height);
 				let h2 = height_map.get(x-1,y)-0.5;
 				let d2 = dendry_noise.eval(x-1,y)/Math.max(grid_width,grid_height)
+				// Approximate derivative dE/dx scaled by grid_width
 				return ((h1 + 0.5*(1-d1)) - (h2 + 0.5*(1-d2))) / (2/grid_width);
 			})());
 			const hy = ((() => {
@@ -65,27 +68,40 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 				let d1 = dendry_noise.eval(x,y+1)/Math.max(grid_width,grid_height);
 				let h2 = height_map.get(x,y-1)-0.5;
 				let d2 = dendry_noise.eval(x,y-1)/Math.max(grid_width,grid_height);
+				// Approximate derivative dE/dy scaled by grid_height
 				return ((h1 + 0.5*(1-d1)) - (h2 + 0.5*(1-d2))) / (2/grid_height);
 			})());
-			normals[idx] = vec3.normalize([0,0,0], [ -hx, -hy, 1 ]);
+
+			// Calculate tangent, binormal, and normal
+			let tangent = vec3.normalize([0,0,0], [1, 0, hx]);
+			let binormal = vec3.normalize([0,0,0], [0, 1, hy]);
+			let normal = vec3.normalize([0,0,0], [-hx, -hy, 1]); // Consistent with cross(tangent, binormal)
+
 			if (elevation < WATER_LEVEL) {
 				elevation = WATER_LEVEL;
-				normals[idx] = vec3.normalize([0,0,0], [0, 0, 1]); // Water surface normal
+				normal = [0, 0, 1]; // Water surface normal
+				tangent = [1, 0, 0]; // Water surface tangent
+				binormal = [0, 1, 0]; // Water surface binormal
 			}
+
+			normals[idx] = normal;
+			tangents[idx] = tangent;
+			binormals[idx] = binormal;
 			
 			const vx = x/grid_width - 0.5;
 			const vy = y/grid_height - 0.5;
 
 			vertices[idx] = [vx, vy, elevation];
+
+			const u = x / (grid_width - 1);
+            const v = y / (grid_height - 1);
+            tex_coords[idx] = [u, v];
 		}
 	}
 
 	for(let gy = 0; gy < grid_height - 1; gy++) {
 		for(let gx = 0; gx < grid_width - 1; gx++) {
-			/* 
-			Triangulate the grid cell whose lower lefthand corner is grid index (gx, gy).
-			You will need to create two triangles to fill each square.
-			*/
+	
 			const va = xy_to_v_index(gx, gy);
 			const vb = xy_to_v_index(gx+1, gy);
 			const vc = xy_to_v_index(gx, gy+1);
@@ -93,14 +109,14 @@ export function terrain_build_mesh(height_map, WATER_LEVEL) {
 
 			faces.push([va, vb, vc]);
 			faces.push([vb, vd, vc]);
-			// faces.push([v1, v2, v3]) // adds a triangle on vertex indices v1, v2, v3
 		}
 	}
 
 	return {
 		vertex_positions: vertices,
 		vertex_normals: normals,
+		vertex_tangents: tangents,
+		vertex_binormals: binormals,
 		faces: faces,
-        vertex_tex_coords: []
 	}
 }

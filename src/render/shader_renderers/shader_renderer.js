@@ -51,6 +51,9 @@ export class ShaderRenderer {
             vertex_positions:    regl.prop('mesh.vertex_positions'),
             vertex_normal:      regl.prop('mesh.vertex_normals'),
             vertex_tex_coords:  regl.prop('mesh.vertex_tex_coords'),
+            vertex_tangent:  regl.prop('mesh.vertex_tangents'),
+            vertex_binormal:  regl.prop('mesh.vertex_binormals'),
+
         };
     }
 

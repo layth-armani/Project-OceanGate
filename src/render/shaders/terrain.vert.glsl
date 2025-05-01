@@ -1,31 +1,30 @@
+precision mediump float;
+
 attribute vec3 vertex_positions;
 attribute vec3 vertex_normal;
+attribute vec3 vertex_tex_coords;
+attribute vec3 vertex_tangent;
+attribute vec3 vertex_binormal;
 
-// Varying values passed from the vertex shader
-varying vec3 v2f_normal;
-varying vec3 v2f_frag_pos;
-varying vec3 v2f_light_position;
-varying float v2f_height;
-
-// Global variables specified in "uniforms" entry of the pipeline
 uniform mat4 mat_model_view_projection;
 uniform mat4 mat_model_view;
-uniform mat3 mat_normals_model_view; // mat3 not 4, because normals are only rotated and not translated
+uniform mat3 mat_normals_model_view;
 
-uniform vec3 light_position; //in camera space coordinates already
+varying vec3 frag_position;
+varying vec3 frag_normal;
+varying vec2 frag_tex_coords;
+varying vec3 frag_tangent;
+varying vec3 frag_binormal;
 
-void main()
-{
-    // the height of the terrain is its z coordinates
-    v2f_height = vertex_positions.z;
-    vec4 vertex_positions_v4 = vec4(vertex_positions, 1);
-	
-	// viewing vector (from camera to vertex in view coordinates), camera is at vec3(0, 0, 0) in cam coords
-	// vertex position in camera coordinates
-	v2f_frag_pos = (mat_model_view * vec4(vertex_positions_v4)).xyz;
-	// transform normal to camera coordinates
-	v2f_normal = normalize(mat_normals_model_view * vertex_normal);
-    v2f_light_position = light_position;
-	
-	gl_Position = mat_model_view_projection * vertex_positions_v4;
+void main() {
+    gl_Position = mat_model_view_projection * vec4(vertex_positions, 1.0);
+
+    frag_position = (mat_model_view * vec4(vertex_positions, 1.0)).xyz;
+
+    frag_normal = normalize(mat_normals_model_view * vertex_normal);
+
+    frag_tangent = normalize(mat_normals_model_view * vertex_tangent);
+
+    frag_binormal = normalize(mat_normals_model_view * vertex_binormal);
+
 }
