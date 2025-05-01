@@ -1,4 +1,4 @@
-import { ShaderRenderer } from "./shader_renderer";
+import { ShaderRenderer } from "./shader_renderer.js";
 
 export class BloomShaderRenderer extends ShaderRenderer{
     constructor(regl, resource_manager){
@@ -48,8 +48,6 @@ export class BloomShaderRenderer extends ShaderRenderer{
                 dst: 1,
             },
         };
-
-
     }
 
     uniforms(regl){

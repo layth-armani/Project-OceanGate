@@ -154,6 +154,7 @@ export class ResourceManager{
             `buffer_to_screen.vert.glsl`, `buffer_to_screen.frag.glsl`,
             'terrain.vert.glsl', 'terrain.frag.glsl',
             'bloom.vert.glsl', 'bloom.frag.glsl',
+            'gaussian_blur.vert.glsl','gaussian_blur.frag.glsl',
           ];
     }
 

@@ -1,5 +1,6 @@
-import { vec2 } from "../../../lib/gl-matrix_3.3.0/esm";
-import { ShaderRenderer } from "./shader_renderer";
+import { ShaderRenderer } from "./shader_renderer.js";
+import { ResourceManager } from "../../scene_resources/resource_manager.js";
+import { texture_data, light_to_cam_view } from "../../cg_libraries/cg_render_utils.js"
 
 export class BlurShaderRenderer extends ShaderRenderer{
     constructor(regl, resource_manager){
@@ -22,7 +23,7 @@ export class BlurShaderRenderer extends ShaderRenderer{
 
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
             const {texture, is_textured} = texture_data(obj, this.resource_manager);
-            const texSize = vec2.fromValues(texture.width, texture.height);
+            const texSize = [texture.width, texture.height];
 
             const {     
                 mat_model_view, 
@@ -38,7 +39,6 @@ export class BlurShaderRenderer extends ShaderRenderer{
                 image: texture,
                 texSize: texSize,
                 horizontal: horizontal,
-                weight: [0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216],
 
             });
 
@@ -67,7 +67,6 @@ export class BlurShaderRenderer extends ShaderRenderer{
 
             image: regl.prop('image'),
             horizontal: regl.prop('horizontal'),
-            weight: regl.prop('weight'),
             texSize: regl.prop('texSize'),
 
         };

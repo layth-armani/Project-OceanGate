@@ -40,8 +40,7 @@ export class SceneRenderer {
         // Create textures & buffer to save some intermediate renders into a texture
         this.create_texture_and_buffer("shadows", {}); 
         this.create_texture_and_buffer("base", {}); 
-        this.create_texture_and_buffer("bloom",{});
-        this.create_texture_and_buffer("blur",{});
+
     }
 
     /**
@@ -127,6 +126,10 @@ export class SceneRenderer {
             // Render shaded objects
             this.blinn_phong.render(scene_state);
 
+            this.bloom.render(scene_state);
+            this.blur.render(scene_state, true);
+            this.blur.render(scene_state, false);
+            
             // Render the reflection of mirror objects on top
             this.mirror.render(scene_state, (s_s) => {
                 this.pre_processing.render(scene_state);
@@ -134,13 +137,8 @@ export class SceneRenderer {
                 this.terrain.render(scene_state);
                 this.blinn_phong.render(s_s);
             });
-        })
 
-        this.render_in_texture("bloom", () =>{
-            this.bloom.render(scene_state);
-            this.blur.render(scene_state, this.texture("bloom"), true);
-            this.blur.render(scene_state, this.texture("bloom"), false);
-        });
+        })
 
         
 
@@ -165,7 +163,7 @@ export class SceneRenderer {
         ---------------------------------------------------------------*/
 
         // Mix the base color of the scene with the shadows information to create the final result
-        this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"),this.texture("bloom"), this.texture("blur"));
+        this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
 
         // Visualize cubemap
         // this.mirror.env_capture.visualize();
