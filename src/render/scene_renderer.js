@@ -7,6 +7,8 @@ import { MapMixerShaderRenderer } from "./shader_renderers/map_mixer_sr.js"
 import { TerrainShaderRenderer } from "./shader_renderers/terrain_sr.js"
 import { PreprocessingShaderRenderer } from "./shader_renderers/pre_processing_sr.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js"
+import { BloomShaderRenderer } from "./shader_renderers/bloom_sr.js"
+import { BlurShaderRenderer } from "./shader_renderers/gaussian_blur_sr.js"
 
 export class SceneRenderer {
 
@@ -31,10 +33,15 @@ export class SceneRenderer {
         this.mirror = new MirrorShaderRenderer(regl, resource_manager);
         this.shadows = new ShadowsShaderRenderer(regl, resource_manager);
         this.map_mixer = new MapMixerShaderRenderer(regl, resource_manager);
+        
+        this.bloom = new BloomShaderRenderer(regl,resource_manager);
+        this.blur = new BlurShaderRenderer(regl,resource_manager);
 
         // Create textures & buffer to save some intermediate renders into a texture
         this.create_texture_and_buffer("shadows", {}); 
         this.create_texture_and_buffer("base", {}); 
+        this.create_texture_and_buffer("bloom",{});
+        this.create_texture_and_buffer("blur",{});
     }
 
     /**
@@ -129,6 +136,16 @@ export class SceneRenderer {
             });
         })
 
+        this.render_in_texture("bloom", () =>{
+            this.bloom.render(scene_state);
+            this.blur.render(scene_state, this.texture("bloom"), true);
+            this.blur.render(scene_state, this.texture("bloom"), false);
+        });
+
+        
+
+
+
         /*---------------------------------------------------------------
             2. Shadows Render Pass
         ---------------------------------------------------------------*/
@@ -148,7 +165,7 @@ export class SceneRenderer {
         ---------------------------------------------------------------*/
 
         // Mix the base color of the scene with the shadows information to create the final result
-        this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+        this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"),this.texture("bloom"), this.texture("blur"));
 
         // Visualize cubemap
         // this.mirror.env_capture.visualize();
