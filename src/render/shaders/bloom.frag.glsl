@@ -1,7 +1,7 @@
     precision mediump float;
 
     uniform vec3 material_base_color;
-    uniform float threshold;
+
 
 
     void main(){
@@ -11,7 +11,7 @@
 
         float brightness = dot(material_base_color, luminance);
 
-        vec3 bloom_color = brightness > threshold ? material_base_color : vec3(0.0);
+        vec3 bloom_color = brightness > 0.1 ? material_base_color : vec3(0.0);
         
         gl_FragColor = vec4(bloom_color, 1.);
         

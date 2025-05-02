@@ -19,6 +19,7 @@ export class BloomShaderRenderer extends ShaderRenderer{
         for(const obj of scene.objects){
             if(this.exclude_object(obj)) continue;
 
+            const threshold = 0.7;
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
 
             const { 
@@ -32,6 +33,7 @@ export class BloomShaderRenderer extends ShaderRenderer{
 
                 mat_model_view_projection : mat_model_view_projection,
                 material_base_color: obj.material.color,
+                
             });
 
         }
@@ -50,6 +52,18 @@ export class BloomShaderRenderer extends ShaderRenderer{
         };
     }
 
+    exclude_object(obj){
+        return !obj.material.properties.includes('no_bloom');
+    }
+
+    depth(){
+        return {
+            enable: true,
+            mask: true,
+            func: '<=',
+        };
+    }
+
     uniforms(regl){
         return {
             //View related matrix
@@ -57,7 +71,6 @@ export class BloomShaderRenderer extends ShaderRenderer{
 
             //Material data
             material_base_color: regl.prop('material_base_color'),
-            threshold:  1.0
         };
     }
 

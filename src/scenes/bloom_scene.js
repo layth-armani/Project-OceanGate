@@ -1,13 +1,12 @@
-import * as MATERIALS from "../render/materials.js"
 
-import { 
-  create_slider, 
-  create_button_with_hotkey, 
-  create_hotkey_action 
-} from "../cg_libraries/cg_web.js";
-import { Scene } from "./scene.js";
-import { ResourceManager } from "../scene_resources/resource_manager.js";
-import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js";
+import { POVCamera } from "../scene_resources/camera.js"
+import * as MATERIALS from "../render/materials.js"
+import { cg_mesh_make_uv_sphere } from "../cg_libraries/cg_mesh.js"
+import { Scene } from "./scene.js"
+import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
+import { create_button, create_slider, create_hotkey_action } from "../cg_libraries/cg_web.js"
+import { ResourceManager } from "../scene_resources/resource_manager.js"
+import { ProceduralTextureGenerator } from "../render/procedural_texture_generator.js"
 import { BezierCamAnimation } from "../scene_resources/bezier_cam_animation.js";
 
 export class BloomScene extends Scene {
@@ -15,17 +14,17 @@ export class BloomScene extends Scene {
   /**
    * A scene to be completed, used for the introductory tutorial
    * @param {ResourceManager} resource_manager 
+   * @param {ProceduralTextureGenerator} procedural_texture_generator 
    */
-  constructor(resource_manager){
+  constructor(resource_manager, procedural_texture_generator){
     super();
     
     this.resource_manager = resource_manager;
+    this.procedural_texture_generator = procedural_texture_generator;
 
     this.static_objects = [];
-
+    this.dynamic_objects = [];
     
-
-    this.texture_and_buffers = [];
 
     this.initialize_scene();
     this.initialize_actor_actions();
@@ -39,9 +38,33 @@ export class BloomScene extends Scene {
     // TODO
 
     this.lights.push({
-      position : [0.0 , -2.0, 2.5],
-      color: [1.0, 1.0, 0.9]
+      position : [-4,-5,7],
+      color: [0.75, 0.53, 0.45]
     });
+
+    this.lights.push({
+      position : [6,4,6],
+      color: [0.0, 0.0, 0.3]
+    });
+
+    this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
+
+    this.static_objects.push({
+      translation: [0, 0, 0],
+      scale: [80., 80., 80.],
+      mesh_reference: 'mesh_sphere_env_map',
+      material: MATERIALS.sunset_sky
+    });
+
+
+    this.static_objects.push({
+      translation: [0.0, 0.0, 0.0],
+      scale:[0.10, 0.10, 0.10],
+      mesh_reference: 'fish.obj',
+      material: MATERIALS.fish
+    });
+
+    this.objects = this.static_objects;
 
     
 
@@ -65,23 +88,25 @@ export class BloomScene extends Scene {
 
     const n_steps_slider = 100;
 
-    create_slider(
-      "movement speed", 
-      [0, n_steps_slider], 
-      (i) => {
+      create_slider(
+        "movement speed", 
+        [0, n_steps_slider], 
+        (i) => {
         const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
         this.camera.setMovSpeed(new_speed);
-      }
-    )
+        },
+        1
+      )
 
-    create_slider(
-      "sensitivity",
-      [0, n_steps_slider], 
-      (i) => {
+      create_slider(
+        "sensitivity",
+        [0, n_steps_slider],  
+        (i) => {
         const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
         this.camera.setRotSensitivity(new_sens);
-      }
-    )
+        },
+        1
+      )
 
     create_hotkey_action("Bezier Animation", "o", () => {
       this.camera.set_animation(
