@@ -109,7 +109,7 @@ export const pine = new DiffuseMaterial({
 });
 
 
-export function terrain(texture = default_texture, normal_map = null) {
+export function normal_map(texture = default_texture, normal_map = null) {
     return new TerrainMaterial({
         texture: texture,
         normal_map: normal_map

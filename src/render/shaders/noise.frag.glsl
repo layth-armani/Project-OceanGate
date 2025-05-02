@@ -376,3 +376,101 @@ vec3 tex_deep_sea(vec2 point) {
 
     return clamp(color, 0.0, 1.0);
 }
+
+// ==============================================================
+// Dendry Noise
+
+const vec2 resolution = vec2(100., 100.);
+const float  levels = 3.;
+const float max_levels = 10.;
+const float epsilon = 0.25;
+const float delta = 0.05;
+const float gridSize = 4.;
+const float beta = 1.5;
+
+vec2 hash22(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)),
+             dot(p, vec2(269.5, 183.3)));
+    return fract(sin(p) * 43758.5453);
+}
+
+float segmentDistance(vec2 p, vec2 a, vec2 b){
+	vec2 ab = b - a;
+    vec2 ap = a - b;
+	float t = clamp(dot(ap,ab)/ dot(ab,ab), 0., 1.);
+	vec2 proj = a + t * ab;
+	return distance(p, proj);
+}
+
+vec2 generateKeyPos(float i, float j, float gridN, float epsilon) {
+    float fx = (i + 0.5) / gridN;
+    float fy = (j + 0.5) / gridN;
+    
+    vec2 rand = hash22(vec2(float(i), float(j)));
+    rand = rand * 2. - 1.;
+    
+    float jitterRange = (0.5 - epsilon) / float(gridN);
+    vec2 jitter = rand * jitterRange;
+
+    return vec2(fx + jitter.x, fy + jitter.y) * resolution;
+}
+
+float dendry(vec2 point){
+	
+	float sum = 0.;
+    
+    for (float k = 0.0; k < max_levels; k++) {
+        if (k >= levels) break; 
+        
+        float gridSize = (gridSize * pow(2., k));
+        
+        float baseI = (point.x / resolution.x * gridSize);
+        float baseJ = (point.y / resolution.y * gridSize);
+
+        for (int dj = -1; dj <= 1; dj++) {
+            for (int di = -1; di <= 1; di++) {
+                float ci = baseI + float(di);
+                float cj = baseJ + float(dj);
+                
+                if (ci < 0. || cj < 0. || ci >= gridSize || cj >= gridSize) 
+                    continue;
+                    
+                vec2 centerPos = generateKeyPos(ci, cj, gridSize, epsilon);
+                
+				float ni0 = ci + 1.;
+				float ni1 = ci;
+				float ni2 = ci + 1.;
+				float nj0 = cj;
+				float nj1 = cj + 1.;
+				float nj2 = cj + 1.;
+                
+                if (!(ni0 < 0. || nj0 < 0. || ni0 >= gridSize || nj0 >= gridSize)) {
+					vec2 neighborPos = generateKeyPos(float(ni0), float(nj0), gridSize, epsilon);
+					float d = segmentDistance(point, centerPos, neighborPos);
+					sum += pow(d, -beta);
+				}
+
+				if (!(ni1 < 0. || nj1 < 0. || ni1 >= gridSize || nj1 >= gridSize)) {
+					vec2 neighborPos = generateKeyPos(float(ni1), float(nj1), gridSize, epsilon);
+					float d = segmentDistance(point, centerPos, neighborPos);
+					sum += pow(d, -beta);
+				}
+
+		
+				if (!(ni2 < 0. || nj2 < 0. || ni2 >= gridSize || nj2 >= gridSize)) {
+					vec2 neighborPos = generateKeyPos(float(ni2), float(nj2), gridSize, epsilon);
+					float d = segmentDistance(point, centerPos, neighborPos);
+					sum += pow(d, -beta);
+				}
+            }
+        }
+    }
+    
+    return pow(sum, -1. / beta);
+}
+
+vec3 tex_dendry(vec2 point) {
+	float noise_val = dendry(point) + 0.5;
+	return vec3(noise_val);
+}
+

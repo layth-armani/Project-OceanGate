@@ -68,15 +68,20 @@ export class DemoScene extends Scene {
 
 
     // Compute base perlin/FBM noise
-    const height_map = this.procedural_texture_generator.compute_texture(
+    const perlin_height_map = this.procedural_texture_generator.compute_texture(
       "perlin_heightmap", 
       noise_functions.FBM_for_terrain, 
+      { width, height, mouse_offset: [-12.24, 8.15] }
+    );
+    const dendry_height_map = this.procedural_texture_generator.compute_texture(
+      "dendry_heightmap",
+      noise_functions.Dendry, 
       { width, height, mouse_offset: [-12.24, 8.15] }
     );
     
     this.WATER_LEVEL = -0.5;
     this.TERRAIN_SCALE = [200, 200, 20];
-    const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
+    const terrain_mesh = terrain_build_mesh(perlin_height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
 
@@ -92,7 +97,7 @@ export class DemoScene extends Scene {
       translation: [0, 0, -20],
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
-      material: MATERIALS.terrain('sand', null)
+      material: MATERIALS.diffuse('sand')
     });
 
     // Combine the dynamic & static objects into one array

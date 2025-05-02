@@ -9,6 +9,7 @@ export const noise_functions = {
     Perlin: "tex_perlin",
     FBM: "tex_fbm",
     Turbulence: "tex_turbulence",
+    Dendry: "tex_dendry",
     Map: "tex_map",
     Wood: "tex_wood",
     Sand: "tex_sand",
