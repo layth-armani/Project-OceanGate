@@ -1,18 +1,26 @@
-    precision mediump float;
+precision mediump float;
 
-    uniform vec3 material_base_color;
+varying vec4 canvas_pos;
 
+uniform float threshold;
+uniform sampler2D texture;
 
+void main(){
 
-    void main(){
+    // get uv coordinates in the canvas 
+    vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+    vec3 color = texture2D(texture, uv).rgb;
 
+    const vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
+    float brightness = dot(color, luminance);
 
-        const vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
-
-        float brightness = dot(material_base_color, luminance);
-
-        vec3 bloom_color = brightness > 0.1 ? material_base_color : vec3(0.0);
         
-        gl_FragColor = vec4(bloom_color, 1.);
+    if(brightness > threshold ){
+
+        gl_FragColor = vec4(color, 1.);
+    }
+    else{
+        gl_FragColor = vec4(0. , 0., 0., 1);
+    }
         
     }

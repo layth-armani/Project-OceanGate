@@ -53,15 +53,15 @@ export class BloomScene extends Scene {
       translation: [0, 0, 0],
       scale: [80., 80., 80.],
       mesh_reference: 'mesh_sphere_env_map',
-      material: MATERIALS.sunset_sky
+      material: MATERIALS.gray
     });
 
 
     this.static_objects.push({
-      translation: [0.0, 0.0, 0.0],
-      scale:[0.10, 0.10, 0.10],
-      mesh_reference: 'fish.obj',
-      material: MATERIALS.fish
+      translation: [1.50, 0.0, 0.0],
+      scale:[0.30, 0.30, 0.30],
+      mesh_reference: 'suzanne.obj',
+      material: MATERIALS.gold
     });
 
     this.objects = this.static_objects;

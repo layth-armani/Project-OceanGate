@@ -134,11 +134,8 @@ export class SceneRenderer {
                 this.flat_color.render(s_s);
                 this.terrain.render(scene_state);
                 this.blinn_phong.render(s_s);
-            });
-            
+            });    
         })
-
-
 
         /*---------------------------------------------------------------
             2. Shadows Render Pass
@@ -159,13 +156,9 @@ export class SceneRenderer {
         ---------------------------------------------------------------*/
 
         // Mix the base color of the scene with the shadows information to create the final result
-    
         this.map_mixer.render(scene_state ,this.texture("shadows"), this.texture("base"));
-        this.bloom.render(scene_state); 
-
-        // Visualize cubemap
-        // this.mirror.env_capture.visualize();
-
+        this.bloom.render(scene_state, this.texture("base"));
+        
     }
 }
 
