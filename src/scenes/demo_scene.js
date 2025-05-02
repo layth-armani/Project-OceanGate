@@ -65,16 +65,6 @@ export class DemoScene extends Scene {
       }
     );
 
-    this.procedural_texture_generator.compute_texture(
-      "normal_map", 
-      noise_functions.Dune,
-      {mouse_offset: [-12.24, 8.15],
-        zoom_factor: 0.1,
-        width: width,  
-        height: height,
-        as_texture: true
-      }
-    );
 
 
     // Compute base perlin/FBM noise
