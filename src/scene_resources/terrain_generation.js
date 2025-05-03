@@ -1,5 +1,4 @@
 import {vec2, vec3, vec4, mat2, mat3, mat4} from "../../lib/gl-matrix_3.3.0/esm/index.js"
-import { DendryNoise } from "./dendry_noise.js";
 
 /**
  * Generate procedurally a terrain mesh using some procedural noise
