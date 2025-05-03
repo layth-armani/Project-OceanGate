@@ -12,8 +12,6 @@ export function terrain_build_mesh(perlin_height_map, dendry_height_map) {
 
 	const vertices = [];
 	const normals = [];
-
-	const tex_coords = [];
 	const faces = [];
 
 	// Map a 2D grid index (x, y) into a 1D index into the output vertex array.
@@ -56,9 +54,12 @@ export function terrain_build_mesh(perlin_height_map, dendry_height_map) {
 
 			vertices[idx] = [vx, vy, elevation];
 
-			const u = x / (grid_width - 1);
-            const v = y / (grid_height - 1);
-            tex_coords[idx] = [u, v];
+			const nx = -hx;
+			const ny = -hy;
+			const nz = 1.0;
+
+			const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+			normals[idx] = [nx/len, ny/len, nz/len];
 		}
 	}
 
