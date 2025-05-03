@@ -97,6 +97,18 @@ export class MirrorShaderRenderer extends ShaderRenderer {
             func: '<=',
         };
     }
+    
+    blend(){
+        return {
+            enable: true,
+            func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+            }
+        };
+    }
 
     uniforms(regl){
         return {

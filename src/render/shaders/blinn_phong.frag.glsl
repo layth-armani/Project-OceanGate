@@ -17,9 +17,11 @@ uniform float ambient_factor;
 void main()
 {
     vec3 material_color = material_base_color;
+    float alpha = 1.;
     if (is_textured){
         vec4 frag_color_from_texture = texture2D(material_texture, v2f_uv);
         material_color = frag_color_from_texture.xyz;
+        alpha = frag_color_from_texture.a;
     }
 
 	float material_ambient = 0.6;

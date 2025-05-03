@@ -1,6 +1,6 @@
 import { TurntableCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
-import { cg_mesh_make_uv_sphere } from "../cg_libraries/cg_mesh.js"
+import { cg_mesh_make_uv_sphere, cg_mesh_make_square} from "../cg_libraries/cg_mesh.js"
 import { terrain_build_mesh } from "../scene_resources/terrain_generation.js"
 import { noise_functions } from "../render/shader_renderers/noise_sr.js"
 import { Scene } from "./scene.js"
@@ -65,6 +65,17 @@ export class DemoScene extends Scene {
       }
     );
 
+    this.procedural_texture_generator.compute_texture(
+      "coral", 
+      noise_functions.Coral,
+      {mouse_offset: [-12.24, 8.15],
+        zoom_factor: 1.,
+        width: 40,
+        height: 40,
+        as_texture: true
+      }
+    );
+
 
 
     // Compute base perlin/FBM noise
@@ -84,6 +95,8 @@ export class DemoScene extends Scene {
     const terrain_mesh = terrain_build_mesh(perlin_height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square", cg_mesh_make_square(1.0, 1, [0, 1, 0]));
+
 
     // Add some meshes to the static objects list
     this.static_objects.push({
@@ -98,6 +111,13 @@ export class DemoScene extends Scene {
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
       material: MATERIALS.diffuse('sand')
+    });
+
+    this.static_objects.push({
+      translation: [0, -10, 0],
+      scale: [20, 20, 20],      
+      mesh_reference: 'mesh_vertical_square',
+      material: MATERIALS.diffuse('coral')  
     });
 
     // Combine the dynamic & static objects into one array

@@ -112,6 +112,111 @@ export function cg_mesh_make_plane(){
 }
 
 /**
+ * Creates a flat square mesh centered at origin with custom orientation
+ * @param {number} size - Side length of the square
+ * @param {number} divisions - Number of divisions (grid cells) per side
+ * @param {Array<number>} normal - Normal vector for the plane [x,y,z]
+ * @param {number} rotation - Rotation angle in radians around the normal
+ * @returns {Object} Mesh object with vertex positions, normals, texture coordinates and faces
+ */
+export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1], rotation = 0) {
+    const vertices = [];
+    const normals = [];
+    const tex_coords = [];
+    const faces = [];
+    const tangents = [];    
+    const binormals = [];  
+    
+    const half_size = size / 2;
+    const step = size / divisions;
+    
+    const norm = Math.sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+    const n = [normal[0]/norm, normal[1]/norm, normal[2]/norm];
+    
+    let u, v;
+    
+    if (Math.abs(n[0]) < 0.8) {
+        u = vec3.cross(vec3.create(), n, [1, 0, 0]);
+    } else {
+        u = vec3.cross(vec3.create(), n, [0, 1, 0]);
+    }
+    
+    vec3.normalize(u, u);
+    
+    v = vec3.cross(vec3.create(), n, u);
+    
+    if (rotation !== 0) {
+        const cos_r = Math.cos(rotation);
+        const sin_r = Math.sin(rotation);
+        
+        const u_rotated = [
+            u[0] * cos_r + v[0] * sin_r,
+            u[1] * cos_r + v[1] * sin_r,
+            u[2] * cos_r + v[2] * sin_r
+        ];
+        
+        const v_rotated = [
+            -u[0] * sin_r + v[0] * cos_r,
+            -u[1] * sin_r + v[1] * cos_r,
+            -u[2] * sin_r + v[2] * cos_r
+        ];
+        
+        u = u_rotated;
+        v = v_rotated;
+    }
+    
+    for (let i = 0; i <= divisions; i++) {
+        for (let j = 0; j <= divisions; j++) {
+            const s = -half_size + j * step;
+            const t = -half_size + i * step;
+            
+            const x = s * u[0] + t * v[0];
+            const y = s * u[1] + t * v[1];
+            const z = s * u[2] + t * v[2];
+            
+            vertices.push([x, y, z]);
+            
+            normals.push(n);
+            
+            // Add tangent (u vector) for this vertex
+            tangents.push(u);
+            
+            // Add bitangent (v vector) for this vertex
+            binormals.push(v);
+            
+            tex_coords.push([j / divisions, i / divisions]);
+        }
+    }
+    
+    for (let i = 0; i < divisions; i++) {
+        for (let j = 0; j < divisions; j++) {
+            const idx = i * (divisions + 1) + j;
+            
+            faces.push([
+                idx,
+                idx + 1,
+                idx + divisions + 1
+            ]);
+            
+            faces.push([
+                idx + 1,
+                idx + divisions + 2,
+                idx + divisions + 1
+            ]);
+        }
+    }
+    
+    return {
+        vertex_positions: vertices,
+        vertex_normals: normals,
+        faces: faces,
+        vertex_tex_coords: tex_coords,
+        vertex_tangents: tangents,     
+        vertex_binormals: binormals   
+    };
+}
+
+/**
  * 
  * @param {*} url 
  * @param {*} material_colors_by_name 

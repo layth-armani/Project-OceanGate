@@ -106,13 +106,14 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
     }
 
     blend(){
-        // Additive blend mode
         return {
             enable: true,
             func: {
-                src: 1,
-                dst: 1,
-            },
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+            }
         };
     }
 

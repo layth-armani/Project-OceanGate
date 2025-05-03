@@ -31,8 +31,11 @@ void main() {
     vec3 diffuse = diff * light_color;
     vec3 ambient = ambient_factor * light_color;
     
-
-    vec3 color = texture2D(material_texture, frag_tex_coords).rgb;
+    vec4 tex_color = texture2D(material_texture, frag_tex_coords);
+    vec3 color = tex_color.rgb;
+    float alpha = tex_color.a;
+    
     vec3 lighting = ambient + diffuse;
-    gl_FragColor = vec4(color * lighting, 1.0);
+    
+    gl_FragColor = vec4(color * lighting, alpha);
 }
