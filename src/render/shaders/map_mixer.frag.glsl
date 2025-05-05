@@ -17,9 +17,6 @@ void main()
     float shadow_factor = texture2D(shadows, uv).x;
     vec3 phong_color = texture2D(blinn_phong, uv).rgb;
     vec3 shadow_color = (1.0 - (shadow_factor * shadows_strength)) * phong_color;
-    if(texture2D(blinn_phong, uv).a < 0.1) {
-        discard;
-    }
 
     vec3 color = phong_color;
     // darken the area where there is shadows

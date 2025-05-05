@@ -112,7 +112,7 @@ export class DemoScene extends Scene {
     });
 
     this.static_objects.push({
-      translation: [0, -10, 0],
+      translation: [0, -10, 10],
       scale: [20, 20, 20],      
       mesh_reference: 'mesh_vertical_square',
       material: MATERIALS.diffuse('coral')

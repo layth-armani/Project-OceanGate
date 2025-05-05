@@ -19,9 +19,7 @@ void main()
         material_color = frag_color_from_texture.xyz;
         alpha = frag_color_from_texture.a;
     }
-    if(alpha<0.1) {
-        discard;
-    }
+
 
 	gl_FragColor = vec4(material_color, 1.); // output: RGBA in 0..1 range
 }
