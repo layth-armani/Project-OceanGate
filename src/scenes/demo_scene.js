@@ -70,8 +70,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 40,
-        height: 40,
+        width: 20,
+        height: 20,
         as_texture: true
       }
     );
@@ -113,7 +113,7 @@ export class DemoScene extends Scene {
 
     this.static_objects.push({
       translation: [0, -10, 10],
-      scale: [20, 20, 20],      
+      scale: [5, 5, 5],      
       mesh_reference: 'mesh_vertical_square',
       material: MATERIALS.diffuse('coral')
     });

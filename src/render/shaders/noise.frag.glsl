@@ -478,11 +478,21 @@ vec3 tex_dendry(vec2 point) {
 // Procedural "coral" texture
 
 vec4 tex_coral(vec2 point) {
-    float d = dendry(point);
+    float n = perlin_fbm(point * 5.0) * 0.5 + 0.5;
 
-	
-	if(d < 5.5) {
-		return vec4(0.,0.,0.,0.);
-	}
-	else return vec4(1.,1.,1.,1.);
+    float fb = smoothstep(0.4, 0.6, n) - smoothstep(0.6, 0.8, n);
+
+    float d = dendry(point * 6.0);
+    d = (d + 1.0) * 0.5;
+    float sk = smoothstep(0.45, 0.55, d);
+
+    float branch_mask = (fb + fb * sk) *0.4;
+
+ 
+    branch_mask = smoothstep(0.1, 0.9, branch_mask);
+
+    float detail = perlin_noise(point * 50.0) * 0.5 + 0.5;
+    vec3 coral_base = mix(vec3(1.0, 0.5, 0.3), vec3(1.0, 0.7, 0.5), detail);
+
+    return vec4(coral_base, branch_mask);
 }
