@@ -36,6 +36,10 @@ async function main() {
       'OES_texture_float', 'OES_texture_float_linear', 'WEBGL_color_buffer_float',
       'OES_vertex_array_object', 'OES_element_index_uint', 'WEBGL_depth_texture'
     ],
+    attributes: {
+      premultipliedAlpha: true,
+      alpha: true
+    }
   })
 
   // The <canvas> object (HTML element for drawing graphics) was created by REGL: we take a handle to it

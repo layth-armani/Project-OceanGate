@@ -23,6 +23,9 @@ void main()
         material_color = frag_color_from_texture.xyz;
         alpha = frag_color_from_texture.a;
     }
+    if(alpha <= 0.1) {
+        discard;
+    }
 
 	float material_ambient = 0.6;
 

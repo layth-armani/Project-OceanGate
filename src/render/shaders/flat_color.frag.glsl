@@ -11,11 +11,16 @@ uniform vec3 material_base_color;
 void main()
 {
     vec3 material_color = material_base_color;
+    float alpha = 1.;
 
     // check wether the color to display is a base color or comes from a texture
     if (is_textured){
         vec4 frag_color_from_texture = texture2D(material_texture, v2f_uv);
         material_color = frag_color_from_texture.xyz;
+        alpha = frag_color_from_texture.a;
+    }
+    if(alpha<0.1) {
+        discard;
     }
 
 	gl_FragColor = vec4(material_color, 1.); // output: RGBA in 0..1 range

@@ -76,8 +76,6 @@ export class DemoScene extends Scene {
       }
     );
 
-
-
     // Compute base perlin/FBM noise
     const perlin_height_map = this.procedural_texture_generator.compute_texture(
       "perlin_heightmap", 
@@ -117,7 +115,7 @@ export class DemoScene extends Scene {
       translation: [0, -10, 0],
       scale: [20, 20, 20],      
       mesh_reference: 'mesh_vertical_square',
-      material: MATERIALS.diffuse('coral')  
+      material: MATERIALS.diffuse('coral')
     });
 
     // Combine the dynamic & static objects into one array

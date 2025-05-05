@@ -66,7 +66,17 @@ export class PreprocessingShaderRenderer extends ShaderRenderer {
             elements: regl.prop('mesh.faces'),
           
             blend: {
-              enable: false,
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+              }
+            },
+            depth: {
+              enable: true,
+              mask: false // Don't write to depth buffer for transparent objects
             },
           
             uniforms: {

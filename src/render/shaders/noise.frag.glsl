@@ -478,21 +478,11 @@ vec3 tex_dendry(vec2 point) {
 // Procedural "coral" texture
 
 vec4 tex_coral(vec2 point) {
-    float radius = length(point);
-    float angle = atan(point.y, point.x);
+    float d = dendry(point);
 
-    float distortion = turbulence(point * 3.0) * 0.2;
-
-    float rings = sin((radius + distortion) * 20.0);
-
-    float ring_noise = turbulence(point * 10.0) * 0.5;
-
-    float value = abs(rings + ring_noise);
-
-    float mask = smoothstep(0.1, 0.2, value);
-
-    vec3 base_color = mix(vec3(1.0, 0.5, 0.3), vec3(1.0, 0.7, 0.6), turbulence(point * 4.0));
-
-    vec3 water_color = vec3(0.1, 0.2, 0.3);
-    return vec4(mix(water_color, base_color, mask), 1.);
+	
+	if(d < 5.5) {
+		return vec4(0.,0.,0.,0.);
+	}
+	else return vec4(1.,1.,1.,1.);
 }

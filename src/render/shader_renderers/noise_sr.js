@@ -89,6 +89,15 @@ export class NoiseShaderRenderer extends ShaderRenderer {
         }
         `;
     }
+
+    depth(){
+        // Use z buffer
+        return {
+            enable: true,
+            mask: false,
+            func: '<=',
+        };
+    }
     
     blend(){
         return {

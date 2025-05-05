@@ -114,7 +114,19 @@ export class ShaderRenderer {
 
             cull: this.cull(),
 
-            blend: this.blend(),
+            blend: {
+                enable: true,
+                func: {
+                  srcRGB: 'src alpha',
+                  srcAlpha: 'src alpha',
+                  dstRGB: 'one minus src alpha',
+                  dstAlpha: 'one minus src alpha'
+                }
+              },
+              depth: {
+                enable: true,
+                mask: false // Don't write to depth buffer for transparent objects
+              },
         
             // Uniforms: global data available to the shader
             uniforms: this.uniforms(regl),

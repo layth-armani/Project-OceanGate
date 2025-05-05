@@ -93,7 +93,7 @@ export class MirrorShaderRenderer extends ShaderRenderer {
     depth(){
         return {
             enable: true,
-            mask: true,
+            mask: false,
             func: '<=',
         };
     }

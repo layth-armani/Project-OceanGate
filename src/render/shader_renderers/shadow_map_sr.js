@@ -1,4 +1,3 @@
-
 import { ResourceManager } from "../../scene_resources/resource_manager.js";
 import { ShaderRenderer } from "./shader_renderer.js";
 
