@@ -1,6 +1,6 @@
 precision mediump float;
 
-varying vec2 TexCoords;
+varying vec4 canvas_pos;
 
 uniform sampler2D image;
 uniform bool horizontal; 
@@ -17,8 +17,10 @@ void main(){
     weight[3] = 0.054054;
     weight[4] = 0.016216;
     
-    vec2 tex_offset = 1.0 / texSize; 
-    vec3 result = texture2D(image, TexCoords).rgb * weight[0]; 
+    vec2 tex_offset = 1.0 / texSize;
+    
+    vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+    vec3 result = texture2D(image, uv).rgb * weight[0]; 
 
     // Horizontal blur pass
     if(horizontal)
@@ -26,8 +28,8 @@ void main(){
         for(int i = 1; i < 5; ++i)
         {
             
-            result += texture2D(image, TexCoords + vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
-            result += texture2D(image, TexCoords - vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
+            result += texture2D(image, uv + vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
+            result += texture2D(image, uv - vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
         }
     }
     // Vertical blur pass
@@ -36,8 +38,8 @@ void main(){
         for(int i = 1; i < 5; ++i)
         {
            
-            result += texture2D(image, TexCoords + vec2(0.0, tex_offset.y * float(i))).rgb * weight[i];
-            result += texture2D(image, TexCoords - vec2(0.0, tex_offset.y * float(i))).rgb * weight[i];
+            result += texture2D(image, uv + vec2(0.0, tex_offset.y * float(i))).rgb * weight[i];
+            result += texture2D(image, uv - vec2(0.0, tex_offset.y * float(i))).rgb * weight[i];
         }
     }
 

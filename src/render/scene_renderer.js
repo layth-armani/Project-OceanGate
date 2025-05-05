@@ -169,6 +169,9 @@ export class SceneRenderer {
         this.render_in_texture("blurred_bloom", () => {
             this.blur.render(scene_state, this.texture("bloom"), false);
         })
+        //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+        //this.bloom.render(scene_state, this.texture("base"));
+        this.blur.render(scene_state, this.texture("bloom"), false);
 
     }
 }
