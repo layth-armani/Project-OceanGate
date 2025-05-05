@@ -5,10 +5,11 @@ varying vec2 v2f_uv;
 
 uniform sampler2D material_texture;
 uniform bool is_textured;
+uniform bool is_translucent;
 uniform vec3 material_base_color;
 
 void main () {
-    if (is_textured) {
+    if (is_textured && is_translucent) {
         vec4 texColor = texture2D(material_texture, v2f_uv);
         if (texColor.a < 0.1) {
             discard; 

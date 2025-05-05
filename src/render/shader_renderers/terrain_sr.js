@@ -41,9 +41,10 @@ export class TerrainShaderRenderer extends ShaderRenderer {
 
                 const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
                 const { texture, is_textured } = texture_data(obj, this.resource_manager);
+                const is_translucent = obj.material.is_translucent;
 
                 const normal_map = obj.material.normal_map 
-                    ? this.resource_manager.get_texture('normal_map')
+                    ? this.resource_manager.get_texture(obj.material.normal_map)
                     : this.#get_texture_from_array(
                         this.#createFlatNormalMap(texture.width, texture.height),
                         texture.width,
@@ -71,6 +72,7 @@ export class TerrainShaderRenderer extends ShaderRenderer {
                     material_texture: texture,
                     material_normal_map: normal_map, 
                     is_textured: is_textured,
+                    is_translucent: is_translucent,
 
                     material_color: obj.material.color,
                     material_shininess: obj.material.shininess,
@@ -92,7 +94,7 @@ export class TerrainShaderRenderer extends ShaderRenderer {
         // Use z-buffer
         return {
             enable: true,
-            mask: false,
+            mask: true,
             func: '<=',
         };
     }
@@ -118,6 +120,8 @@ export class TerrainShaderRenderer extends ShaderRenderer {
             light_color: regl.prop('light_color'),
             ambient_factor: regl.prop('ambient_factor'),
             material_texture: regl.prop('material_texture'),
+            is_textured: regl.prop('is_textured'),
+            is_translucent: regl.prop('is_translucent'),
             material_normal_map: regl.prop('material_normal_map'), 
             material_color: regl.prop('material_color'),
             material_shininess: regl.prop('material_shininess')

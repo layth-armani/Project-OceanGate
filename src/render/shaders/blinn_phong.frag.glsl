@@ -8,6 +8,7 @@ varying vec2 v2f_uv;
 // Global variables specified in "uniforms" entry of the pipeline
 uniform sampler2D material_texture;
 uniform bool is_textured;
+uniform bool is_translucent;
 uniform vec3 material_base_color;
 uniform float material_shininess;
 uniform vec3 light_color;
@@ -23,7 +24,7 @@ void main()
         material_color = frag_color_from_texture.xyz;
         alpha = frag_color_from_texture.a;
     }
-    if(alpha <= 0.1) {
+    if(is_translucent && alpha <= 0.1) {
         discard;
     }
 

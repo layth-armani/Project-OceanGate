@@ -63,7 +63,7 @@ export class FlatColorShaderRenderer extends ShaderRenderer {
     depth(){
         return {
             enable: true,
-            mask: false,
+            mask: true,
             func: '<=',
         };
     }

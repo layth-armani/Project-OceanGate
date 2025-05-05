@@ -70,8 +70,19 @@ export class DemoScene extends Scene {
       noise_functions.Coral,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 20,
-        height: 20,
+        width: 100,
+        height: 100,
+        as_texture: true
+      }
+    );
+
+    this.procedural_texture_generator.compute_texture(
+      "coral_normal", 
+      noise_functions.Coral_Normal,
+      {mouse_offset: [-12.24, 8.15],
+        zoom_factor: 1.,
+        width: 100,
+        height: 100,
         as_texture: true
       }
     );
@@ -93,7 +104,7 @@ export class DemoScene extends Scene {
     const terrain_mesh = terrain_build_mesh(perlin_height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
-    this.resource_manager.add_procedural_mesh("mesh_vertical_square", cg_mesh_make_square(1.0, 1, [0, 1, 0]));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square", cg_mesh_make_square(1.0, 1, [0, 1, 0], Math.PI/4));
 
 
     // Add some meshes to the static objects list
@@ -112,11 +123,12 @@ export class DemoScene extends Scene {
     });
 
     this.static_objects.push({
-      translation: [0, -10, 10],
+      translation: [0, -5, 0],
       scale: [5, 5, 5],      
       mesh_reference: 'mesh_vertical_square',
-      material: MATERIALS.diffuse('coral')
+      material: MATERIALS.normal_map('coral','coral_normal', true)
     });
+    
 
     // Combine the dynamic & static objects into one array
     this.objects = this.static_objects.concat(this.dynamic_objects);

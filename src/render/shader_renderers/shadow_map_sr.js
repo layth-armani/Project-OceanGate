@@ -31,6 +31,7 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
         for (const obj of scene.objects) {
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
             const {texture, is_textured} = texture_data(obj, this.resource_manager);
+            const is_translucent = obj.material.is_translucent;
             
             const { 
                 mat_model_view, 
@@ -43,7 +44,8 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
                 mat_model_view: mat_model_view,
                 material_texture: texture,
                 is_textured: is_textured,
-                material_base_color: obj.material.color
+                material_base_color: obj.material.color,
+                is_translucent: is_translucent
             });
         }
 
@@ -56,13 +58,12 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
 
     uniforms(regl){
         return {
-            // View (camera) related matrix
             mat_model_view_projection: regl.prop('mat_model_view_projection'),
             mat_model_view: regl.prop('mat_model_view'),
-            // Material data for transparency check
             material_texture: regl.prop('material_texture'),
             is_textured: regl.prop('is_textured'),
-            material_base_color: regl.prop('material_base_color')
+            material_base_color: regl.prop('material_base_color'),
+            is_translucent: regl.prop('is_translucent')
         };
     }
 }

@@ -486,13 +486,28 @@ vec4 tex_coral(vec2 point) {
     d = (d + 1.0) * 0.5;
     float sk = smoothstep(0.45, 0.55, d);
 
-    float branch_mask = (fb + fb * sk) *0.4;
+    float branch_mask = (fb + fb * sk*2.) *1.2;
 
  
-    branch_mask = smoothstep(0.1, 0.9, branch_mask);
+    branch_mask = smoothstep(0.7, 1., branch_mask);
 
     float detail = perlin_noise(point * 50.0) * 0.5 + 0.5;
     vec3 coral_base = mix(vec3(1.0, 0.5, 0.3), vec3(1.0, 0.7, 0.5), detail);
 
-    return vec4(coral_base, branch_mask);
+    return vec4(coral_base, 1.-branch_mask);
+}
+
+// ==============================================================
+// Generate normal map from alpha as height
+
+vec3 tex_coral_normal(vec2 point) {
+    float eps = 1.0 / 256.0;
+    float hR = tex_coral(point + vec2(eps, 0.0)).a;
+    float hL = tex_coral(point - vec2(eps, 0.0)).a;
+    float hU = tex_coral(point + vec2(0.0, eps)).a;
+    float hD = tex_coral(point - vec2(0.0, eps)).a;
+    vec3 dx = vec3(eps, 0.0, hR - hL);
+    vec3 dy = vec3(0.0, eps, hU - hD);
+    vec3 normal = normalize(cross(dy, dx));
+    return 0.-normal;
 }

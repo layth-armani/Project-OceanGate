@@ -114,11 +114,10 @@ export class SceneRenderer {
             // Render the background
             this.flat_color.render(scene_state);
 
-            // Render the terrain
+            this.blinn_phong.render(scene_state);
+
             this.terrain.render(scene_state);
 
-            // Render shaded objects
-            this.blinn_phong.render(scene_state);
 
             // Render the reflection of mirror objects on top
             this.mirror.render(scene_state, (s_s) => {

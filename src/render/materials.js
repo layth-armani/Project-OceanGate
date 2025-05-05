@@ -22,6 +22,7 @@ class Material {
         this.texture = default_texture;
         this.color = default_base_color;
         this.shininess = default_shininess;
+        this.is_translucent = false;
         this.properties = [];
     }
 
@@ -43,11 +44,13 @@ class DiffuseMaterial extends Material {
         texture = null, 
         color = default_base_color, 
         shininess = default_shininess,
+        is_translucent = false
     }){
         super()
         this.texture = texture;
         this.color = color;
         this.shininess = shininess;
+        this.is_translucent = is_translucent;
     }
 }
 
@@ -63,14 +66,15 @@ class TerrainMaterial extends Material {
         texture = null, 
         color = default_base_color, 
         shininess = default_shininess,
-        normal_map = null
+        normal_map = null,
+        is_translucent = false,
     }){
         super()
         this.texture = texture;
         this.color = color;
         this.shininess = shininess;
         this.normal_map = normal_map;
-
+        this.is_translucent = is_translucent;
         this.properties.push("terrain");
         this.properties.push("no_blinn_phong");
     }
@@ -109,15 +113,17 @@ export const pine = new DiffuseMaterial({
 });
 
 
-export function normal_map(texture = default_texture, normal_map = null) {
+export function normal_map(texture = default_texture, normal_map = null, is_translucent = false) {
     return new TerrainMaterial({
         texture: texture,
-        normal_map: normal_map
+        normal_map: normal_map,
+        is_translucent: is_translucent
     });
 }
 
-export function diffuse(texture = default_texture) {
+export function diffuse(texture = default_texture, is_translucent = false) {
     return new DiffuseMaterial({
         texture: texture,
+        is_translucent: is_translucent
     });
 }

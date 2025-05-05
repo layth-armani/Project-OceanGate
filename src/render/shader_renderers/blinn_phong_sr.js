@@ -40,11 +40,15 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
             for (const obj of scene.objects) {
 
                 // Check if object is Blinn-Phong shaded
-                if(this.exclude_object(obj)) continue;
+                if(this.exclude_object(obj) || obj.material.is_translucent){
+                    continue;
+                }
 
                 const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
                 const {texture, is_textured} = texture_data(obj, this.resource_manager);
-                
+                const is_translucent = obj.material.is_translucent;
+
+
                 const { 
                     mat_model_view, 
                     mat_model_view_projection, 
@@ -66,7 +70,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
 
                     material_texture: texture,
                     is_textured: is_textured,
-                    is_translucent: false,
+                    is_translucent: is_translucent,
                     material_base_color: obj.material.color,
                     material_shininess: obj.material.shininess
                 });
@@ -123,6 +127,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
             material_texture: regl.prop('material_texture'),
             is_textured: regl.prop('is_textured'),
             material_base_color: regl.prop('material_base_color'),
+            is_translucent: regl.prop('is_translucent'),
             material_shininess: regl.prop('material_shininess')
         };
     }
