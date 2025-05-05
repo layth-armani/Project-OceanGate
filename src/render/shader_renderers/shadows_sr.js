@@ -53,6 +53,8 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
                 if(this.exclude_object(obj)) continue;
 
                 const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
+                const {texture, is_textured} = texture_data(obj, this.resource_manager);
+                const is_translucent = obj.material.is_translucent;
                 
                 const { 
                     mat_model_view, 
@@ -68,6 +70,10 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
 
                     light_position_cam : light_position_cam,
                     num_lights: num_lights,
+                    material_texture: texture,
+                    is_textured: is_textured,
+                    material_base_color: obj.material.color,
+                    is_translucent: is_translucent,
 
                     cube_shadowmap: cube_shadowmap,
                 });
@@ -129,6 +135,10 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
 
             // Cube map
             cube_shadowmap: regl.prop('cube_shadowmap'),
+            material_texture: regl.prop('material_texture'),
+            is_textured: regl.prop('is_textured'),
+            material_base_color: regl.prop('material_base_color'),
+            is_translucent: regl.prop('is_translucent')
         };
     }
 

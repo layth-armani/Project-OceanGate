@@ -140,6 +140,7 @@ export class SceneRenderer {
 
             // Render the shadows
             this.shadows.render(scene_state);
+            
         })
 
         /*---------------------------------------------------------------
