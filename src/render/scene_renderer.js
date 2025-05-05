@@ -40,7 +40,9 @@ export class SceneRenderer {
         // Create textures & buffer to save some intermediate renders into a texture
         this.create_texture_and_buffer("shadows", {}); 
         this.create_texture_and_buffer("base", {});
+        this.create_texture_and_buffer("with_shadows", {});
         this.create_texture_and_buffer("bloom", {});  
+        this.create_texture_and_buffer("blurred_bloom", {});
         
 
     }
@@ -156,9 +158,18 @@ export class SceneRenderer {
         ---------------------------------------------------------------*/
 
         // Mix the base color of the scene with the shadows information to create the final result
-        this.map_mixer.render(scene_state ,this.texture("shadows"), this.texture("base"));
-        this.bloom.render(scene_state, this.texture("base"));
+        this.render_in_texture("with_shadows", () => {
+            this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+        });
+
+        this.render_in_texture("bloom", () => {
+            this.bloom.render(scene_state, this.texture("base"));
+        })
         
+        this.render_in_texture("blurred_bloom", () => {
+            this.blur.render(scene_state, this.texture("bloom"), false);
+        })
+
     }
 }
 

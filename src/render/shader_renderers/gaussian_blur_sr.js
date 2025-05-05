@@ -13,7 +13,7 @@ export class BlurShaderRenderer extends ShaderRenderer{
     }
 
 
-    render(scene_state, horizontal){
+    render(scene_state, texture, horizontal = true){
 
         const scene = scene_state.scene;
         const inputs = [];
@@ -22,8 +22,7 @@ export class BlurShaderRenderer extends ShaderRenderer{
             if(this.exclude_object(obj)) continue;
 
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
-            const {texture, is_textured} = texture_data(obj, this.resource_manager);
-            const texSize = [texture.width, texture.height];
+            const texSize = [scene_state.frame.framebufferWidth, scene_state.frame.framebufferHeight];
 
             const {     
                 mat_model_view, 
