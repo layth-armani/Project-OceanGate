@@ -1,9 +1,20 @@
 precision highp float;
 
-// Varying values passed from the vertex shader
 varying vec3 v2f_frag_pos;
+varying vec2 v2f_uv;
+
+uniform sampler2D material_texture;
+uniform bool is_textured;
+uniform vec3 material_base_color;
 
 void main () {
-	float depth = length(v2f_frag_pos); // in view coordinates, the camera is at [0, 0, 0]
-	gl_FragColor = vec4(depth, depth, depth, 1.);
+    if (is_textured) {
+        vec4 texColor = texture2D(material_texture, v2f_uv);
+        if (texColor.a < 0.1) {
+            discard; 
+        }
+    }
+
+    float depth = length(v2f_frag_pos); 
+    gl_FragColor = vec4(depth, depth, depth, 1.);
 }
