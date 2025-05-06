@@ -3,7 +3,9 @@ import { BlinnPhongShaderRenderer } from "./shader_renderers/blinn_phong_sr.js"
 import { FlatColorShaderRenderer } from "./shader_renderers/flat_color_sr.js"
 import { MirrorShaderRenderer } from "./shader_renderers/mirror_sr.js"
 import { ShadowsShaderRenderer } from "./shader_renderers/shadows_sr.js"
+import { ShadowMapShaderRenderer } from "./shader_renderers/shadow_map_sr.js"
 import { MapMixerShaderRenderer } from "./shader_renderers/map_mixer_sr.js"
+import { FogMixerShaderRenderer } from "./shader_renderers/fog_mixer_sr.js"
 import { TerrainShaderRenderer } from "./shader_renderers/terrain_sr.js"
 import { PreprocessingShaderRenderer } from "./shader_renderers/pre_processing_sr.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js"
@@ -32,20 +34,24 @@ export class SceneRenderer {
         this.terrain = new TerrainShaderRenderer(regl, resource_manager);
 
         this.mirror = new MirrorShaderRenderer(regl, resource_manager);
+        this.shadow_map = new ShadowMapShaderRenderer(regl, resource_manager);
         this.shadows = new ShadowsShaderRenderer(regl, resource_manager);
         this.map_mixer = new MapMixerShaderRenderer(regl, resource_manager);
         this.bloom_mixer = new BloomMixerShaderRenderer(regl, resource_manager)
+        this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
         
         this.bloom = new BloomShaderRenderer(regl,resource_manager);
         this.blur = new BlurShaderRenderer(regl,resource_manager);
+        this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
 
         // Create textures & buffer to save some intermediate renders into a texture
         this.create_texture_and_buffer("shadows", {}); 
         this.create_texture_and_buffer("base", {});
         this.create_texture_and_buffer("with_shadows", {});
         this.create_texture_and_buffer("bloom", {});  
-        this.create_texture_and_buffer("blurred_bloom1", {});
-        this.create_texture_and_buffer("blurred_bloom2", {});
+        this.create_texture_and_buffer("blurred_bloom", {});
+        this.create_texture_and_buffer("scene_with_bloom", {});
+        this.create_texture_and_buffer("distances", {}); 
         
 
     }
@@ -156,6 +162,11 @@ export class SceneRenderer {
             this.shadows.render(scene_state);
         })
 
+        this.render_in_texture("distances", () =>{
+
+            this.shadow_map.render(scene_state);
+        })
+
         /*---------------------------------------------------------------
             3. Compositing
         ---------------------------------------------------------------*/
@@ -169,20 +180,22 @@ export class SceneRenderer {
             this.bloom.render(scene_state, this.texture("with_shadows"));
         })
         
-        this.render_in_texture("blurred_bloom1", () => {
-            this.blur.render(scene_state, this.texture("bloom"), true);
+        this.render_in_texture("blurred_bloom", () => {
+            this.blur.render(scene_state, this.texture("bloom"));
         })
-        this.render_in_texture("blurred_bloom2", () => {
-            this.blur.render(scene_state, this.texture("blurred_bloom1"), false);
+
+        this.render_in_texture("scene_with_bloom", () => {
+            this.bloom_mixer.render(scene_state, this.texture("with_shadows"), this.texture("blurred_bloom"));
         })
+
 
 
         //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
         //this.bloom.render(scene_state, this.texture("with_shadows"));
         //this.blur.render(scene_state, this.texture("blurred_bloom"), true);
 
-        this.bloom_mixer.render(scene_state, this.texture("with_shadows"),  this.texture("blurred_bloom2"));
 
+        this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"))
     }
 }
 

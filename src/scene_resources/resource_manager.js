@@ -148,6 +148,7 @@ export class ResourceManager{
             'point_light_shadows.vert.glsl', 'point_light_shadows.frag.glsl',
             'flat_color.vert.glsl', 'flat_color.frag.glsl',
             'map_mixer.vert.glsl', 'map_mixer.frag.glsl',
+            'fog_mixer.vert.glsl', 'fog_mixer.frag.glsl',
             'mirror.vert.glsl', 'mirror.frag.glsl',
             'shadow_map.vert.glsl', 'shadow_map.frag.glsl',
             'cubemap_visualization.vert.glsl', 'cubemap_visualization.frag.glsl',
