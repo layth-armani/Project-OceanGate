@@ -9,7 +9,7 @@ import { create_button, create_slider, create_hotkey_action } from "../cg_librar
 import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { ProceduralTextureGenerator } from "../render/procedural_texture_generator.js"
 
-export class BloomScene extends Scene {
+export class MilestoneScene extends Scene {
 
   /**
    * A scene to be completed, used for the introductory tutorial
