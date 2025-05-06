@@ -48,9 +48,6 @@ export class BloomMixerShaderRenderer extends ShaderRenderer {
                 mat_model_view: mat_model_view,
                 mat_normals_model_view: mat_normals_model_view,
 
-                canvas_width: scene_state.frame.framebufferWidth, 
-                canvas_height: scene_state.frame.framebufferHeight,
-
                 base_shadows: rendered_base_shadows,
                 bloom: rendered_bloom,
             });
@@ -64,9 +61,6 @@ export class BloomMixerShaderRenderer extends ShaderRenderer {
             mat_model_view_projection: regl.prop('mat_model_view_projection'),
             mat_model_view: regl.prop('mat_model_view'),
             mat_normals_model_view: regl.prop('mat_normals_model_view'),
-
-            canvas_width: regl.prop("canvas_width"),
-            canvas_height: regl.prop("canvas_height"),
 
             base_shadows: regl.prop("base_shadows"),
             bloom: regl.prop("bloom"),

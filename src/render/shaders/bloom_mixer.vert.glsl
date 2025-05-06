@@ -7,8 +7,7 @@ varying vec4 canvas_pos;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform mat4 mat_model_view_projection;
-uniform float canvas_width;
-uniform float canvas_height;
+
 
 void main() {
 

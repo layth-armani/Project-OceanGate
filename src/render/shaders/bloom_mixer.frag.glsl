@@ -17,7 +17,7 @@ void main()
     vec3 base_shadows_color = texture2D(base_shadows, uv).rgb;
     vec3 bloom_color =  texture2D(bloom, uv).rgb;
 
-    vec3 color = base_color + bloom_color * bloom_strength;
+    vec3 color = base_shadows_color + bloom_color * bloom_strength;
   
 
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
