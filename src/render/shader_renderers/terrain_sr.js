@@ -94,7 +94,7 @@ export class TerrainShaderRenderer extends ShaderRenderer {
         // Use z-buffer
         return {
             enable: true,
-            mask: true,
+            mask: false,
             func: '<=',
         };
     }

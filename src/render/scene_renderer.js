@@ -119,6 +119,8 @@ export class SceneRenderer {
             this.terrain.render(scene_state);
 
 
+
+
             // Render the reflection of mirror objects on top
             this.mirror.render(scene_state, (s_s) => {
                 this.pre_processing.render(scene_state);

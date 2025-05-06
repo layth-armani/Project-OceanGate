@@ -92,7 +92,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
         // Use z buffer
         return {
             enable: true,
-            mask: false,
+            mask: true,
             func: '<=',
         };
     }

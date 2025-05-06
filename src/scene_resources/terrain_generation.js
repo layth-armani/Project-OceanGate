@@ -13,6 +13,7 @@ export function terrain_build_mesh(perlin_height_map, dendry_height_map) {
 	const vertices = [];
 	const normals = [];
 	const faces = [];
+	const tex_coords = [];
 
 	// Map a 2D grid index (x, y) into a 1D index into the output vertex array.
 	function xy_to_v_index(x, y) {
@@ -60,6 +61,10 @@ export function terrain_build_mesh(perlin_height_map, dendry_height_map) {
 
 			const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
 			normals[idx] = [nx/len, ny/len, nz/len];
+
+			const u = x / (grid_width - 1);
+            const v = y / (grid_height - 1);
+            tex_coords[idx] = [u, v];
 		}
 	}
 
