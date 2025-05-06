@@ -20,7 +20,6 @@ import { ProceduralTextureGenerator } from "./render/procedural_texture_generato
 import { TutorialScene } from "./scenes/tutorial_scene.js";
 import { DemoScene } from "./scenes/demo_scene.js";
 import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
-import { PerformanceMonitor } from './cg_libraries/performance_monitor.js';
 
 DOM_loaded_promise.then(main)
 
@@ -127,7 +126,6 @@ async function main() {
   initialize_ui_params();  // add general UI controls
   active_scene.initialize_ui_params();  // add scene-specific UI controls
 
-  const performance_monitor = new PerformanceMonitor();
 
   /*---------------------------------------------------------------
     6. Rendering Loop
@@ -151,7 +149,6 @@ async function main() {
     dt = frame.time - prev_regl_time;
     prev_regl_time = frame.time;
 
-    performance_monitor.update(dt);
 
     // If the time is not paused, iterate over all actors and call their evolve function
     if (!ui_global_params.is_paused){

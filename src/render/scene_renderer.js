@@ -86,6 +86,7 @@ export class SceneRenderer {
      * @param {*} scene_state the description of the scene, time, dynamically modified parameters, etc.
      */
     render(scene_state) {
+        let s = performance.now()
         
         const scene = scene_state.scene;
         const frame = scene_state.frame;
@@ -154,6 +155,8 @@ export class SceneRenderer {
 
         // Visualize cubemap
         // this.mirror.env_capture.visualize();
+        let e = performance.now()
+        console.log("Render time: ", e-s);
 
     }
 }

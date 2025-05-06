@@ -85,6 +85,6 @@ export function terrain_build_mesh(perlin_height_map, dendry_height_map) {
 		vertex_positions: vertices,
 		vertex_normals: normals,
 		faces: faces,
-		vertex_tex_coords: [],
+		vertex_tex_coords:[],
 	}
 }

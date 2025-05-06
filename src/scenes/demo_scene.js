@@ -60,8 +60,8 @@ export class DemoScene extends Scene {
       noise_functions.DeepSea,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: width*100,
-        height: height*100,
+        width: width,
+        height: height,
         as_texture: true
       }
     );
