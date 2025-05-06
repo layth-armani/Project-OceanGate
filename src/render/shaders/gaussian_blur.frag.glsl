@@ -23,32 +23,25 @@ void main(){
     vec3 result = texture2D(image, uv).rgb * weight[0]; 
 
     // Horizontal blur pass
-    if(horizontal)
+    for(int i = 1; i < 5; ++i)
     {
-        for(int i = 1; i < 5; ++i)
-        {
-            
-            result += texture2D(image, uv + vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
-            result += texture2D(image, uv - vec2(tex_offset.x * float(i), 0.0)).rgb * weight[i];
-        }
-    }
-    // Vertical blur pass
-    else
-    {
-        for(int i = 1; i < 5; ++i)
-        {
-           
-            result += texture2D(image, uv + vec2(0.0, tex_offset.y * float(i))).rgb * weight[i];
-            result += texture2D(image, uv - vec2(0.0, tex_offset.y * float(i))).rgb * weight[i];
-        }
+        for(int j = 1; j < 5; ++j)
+        { 
+            float i_f = float(i);
+            float j_f = float(j);
+
+            float weight_i = weight[i];
+            float weight_j = weight[j];
+            float pix_w = weight_i * weight_j;
+
+            result += texture2D(image, uv + vec2(tex_offset.x * i_f, tex_offset.y * j_f)).rgb * pix_w;
+            result += texture2D(image, uv + vec2(tex_offset.x * i_f, -tex_offset.y * j_f)).rgb * pix_w;
+            result += texture2D(image, uv + vec2(-tex_offset.x * i_f, tex_offset.y * j_f)).rgb * pix_w;
+            result += texture2D(image, uv + vec2(-tex_offset.x * i_f, -tex_offset.y * j_f)).rgb * pix_w;
+        }  
     }
 
     // Output the final color
     gl_FragColor = vec4(result, 1.0);
-
-
-   
-
 }
-
 
