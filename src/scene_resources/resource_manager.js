@@ -137,7 +137,8 @@ export class ResourceManager{
         return [
             'kloppenheim_07_puresky_blur.jpg',
             'pine.png',
-            'fish.png'
+            'fish.png',
+            'night_sky.jpg'
           ];
     }
 

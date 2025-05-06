@@ -9,7 +9,7 @@ uniform sampler2D bloom;
 
 void main()
 {
-    float bloom_strength = 1.0;
+    float bloom_strength = 0.40;
 
     // get uv coordinates in the canvas 
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;

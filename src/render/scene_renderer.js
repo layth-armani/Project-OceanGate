@@ -44,7 +44,8 @@ export class SceneRenderer {
         this.create_texture_and_buffer("base", {});
         this.create_texture_and_buffer("with_shadows", {});
         this.create_texture_and_buffer("bloom", {});  
-        this.create_texture_and_buffer("blurred_bloom", {});
+        this.create_texture_and_buffer("blurred_bloom1", {});
+        this.create_texture_and_buffer("blurred_bloom2", {});
         
 
     }
@@ -168,14 +169,19 @@ export class SceneRenderer {
             this.bloom.render(scene_state, this.texture("with_shadows"));
         })
         
-        this.render_in_texture("blurred_bloom", () => {
-            this.blur.render(scene_state, this.texture("bloom"), false);
+        this.render_in_texture("blurred_bloom1", () => {
+            this.blur.render(scene_state, this.texture("bloom"), true);
         })
+        this.render_in_texture("blurred_bloom2", () => {
+            this.blur.render(scene_state, this.texture("blurred_bloom1"), false);
+        })
+
+
         //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
         //this.bloom.render(scene_state, this.texture("with_shadows"));
         //this.blur.render(scene_state, this.texture("blurred_bloom"), true);
 
-        this.bloom_mixer.render(scene_state, this.texture("with_shadows"),  this.texture("bloom"));
+        this.bloom_mixer.render(scene_state, this.texture("with_shadows"),  this.texture("blurred_bloom2"));
 
     }
 }

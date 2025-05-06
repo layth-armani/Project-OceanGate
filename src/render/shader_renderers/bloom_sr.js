@@ -19,7 +19,7 @@ export class BloomShaderRenderer extends ShaderRenderer{
         for(const obj of scene.objects){
             if(this.exclude_object(obj)) continue;
 
-            const threshold = 0.6;
+            const threshold = 0.75;
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
 
             const { 
