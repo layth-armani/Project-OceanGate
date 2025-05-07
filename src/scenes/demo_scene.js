@@ -1,7 +1,7 @@
 import { TurntableCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
 import { cg_mesh_make_uv_sphere, cg_mesh_make_square} from "../cg_libraries/cg_mesh.js"
-import { terrain_build_mesh } from "../scene_resources/terrain_generation.js"
+import { terrain_build_mesh } from "../scene_resources/dendry_terrain_generation.js"
 import { noise_functions } from "../render/shader_renderers/noise_sr.js"
 import { Scene } from "./scene.js"
 import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
@@ -131,7 +131,6 @@ export class DemoScene extends Scene {
       mesh_reference: 'mesh_vertical_square_x',
       material: MATERIALS.diffuse('coral', true, true, 'coral_normal')
     });
-    console.log(this.static_objects)
 
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
 
@@ -225,7 +224,7 @@ function pseudo_random_int(index) {
 function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terrain_translation){
   const up_vector = [0,0,1];
   let coral_count = 0;
-  const coral_translation = [terrain_translation[0], terrain_translation[1],terrain_translation[2]-5]
+  const coral_translation = [terrain_translation[0], terrain_translation[1],terrain_translation[2]]
 
   terrain_mesh.vertex_positions.forEach((vertex, index) => {
     const position = vertex;
@@ -277,6 +276,6 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
       }
     }
   });
-  console.log("Corals placed:", coral_count);
+  //console.log("Corals placed:", coral_count);
 }
 

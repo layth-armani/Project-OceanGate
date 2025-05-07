@@ -1,6 +1,5 @@
 import { texture_data, light_to_cam_view } from "../../cg_libraries/cg_render_utils.js"
 import { ResourceManager } from "../../scene_resources/resource_manager.js";
-import { normal_map } from "../materials.js";
 import { ShaderRenderer } from "./shader_renderer.js"
 
 

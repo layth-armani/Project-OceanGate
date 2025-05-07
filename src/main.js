@@ -75,10 +75,6 @@ async function main() {
     create_hotkey_action("Pause", "p", () => {
       ui_global_params.is_paused = !ui_global_params.is_paused;
     });
-
-    create_hotkey_action("Toggle Performance Stats", "f", () => {
-      performance_monitor.toggle();
-    });
   }
 
   /*---------------------------------------------------------------

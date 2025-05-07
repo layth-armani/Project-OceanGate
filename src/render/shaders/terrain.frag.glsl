@@ -1,53 +1,70 @@
-precision mediump float;
+precision highp float;
 
-// Varyings aus Vertex‑Shader
-varying vec3 frag_position;
-varying vec3 frag_normal;
-varying vec2 frag_tex_coords;
-varying vec3 frag_tangent;
-varying vec3 frag_binormal;
+varying float v2f_height;
 
-// Uniforms
-uniform sampler2D material_texture;
-uniform sampler2D material_normal_map;
-uniform bool is_textured;
-uniform bool is_translucent;
-uniform vec3 material_color;
-uniform float material_shininess;
-uniform vec3 light_color;
-uniform vec3 light_position;
-uniform vec3 ambient_factor;
+// Varying values passed to fragment shader
+varying vec3 v2f_normal;
+varying vec3 v2f_frag_pos;
+varying vec3 v2f_light_position;
+
+// Global variables specified in "uniforms" entry of the pipeline
+uniform vec3  light_color;
+uniform vec3  water_color;
+uniform vec3  grass_color;
+uniform vec3  peak_color;
+uniform float  water_shininess;
+uniform float  grass_shininess;
+uniform float  peak_shininess;
+
+uniform float ambient_factor;
+
+// Small perturbation to prevent "z-fighting" on the water on some machines...
+const float terrain_water_level    = -0.03125 + 1e-6;
 
 void main()
 {
-    vec3 base_color = material_color;
-    float alpha = 1.0;
-    if(is_textured) {
-        vec4 col = texture2D(material_texture, frag_tex_coords);
-        base_color = col.xyz;
-        alpha = col.a;
-    }
-    if(is_translucent && alpha <= 0.1) discard;
+	float material_ambient = 0.1; // Ambient light coefficient
+	float height = v2f_height;
+	vec3 light_position = v2f_light_position;
 
-    vec3 n_tangent = normalize(texture2D(material_normal_map, frag_tex_coords).rgb * 2.0 - 1.0);  // :contentReference[oaicite:3]{index=3}
-    mat3 TBN = mat3(
-        normalize(frag_tangent),
-        normalize(frag_binormal),
-        normalize(frag_normal)
-    ); 
-    vec3 n = normalize(TBN * n_tangent);
+	vec3 material_color = grass_color;
+	float shininess = grass_shininess;
 
-    vec3 v = normalize(-frag_position);
-    vec3 l = normalize(light_position - frag_position);
-    vec3 h = normalize(l + v);
+	if (height <= terrain_water_level){
+		material_color = water_color;
+		shininess = water_shininess;
+	}
+	else{
+		float a = (height - terrain_water_level)*2.;
+		material_color = mix(grass_color, peak_color, a);
+		shininess = mix(grass_shininess, peak_shininess, a);
+	}
 
-    float diff = max(dot(n, l), 0.0);
-    float spec = (diff > 0.0) ? pow(max(dot(n, h), 1e-4), material_shininess) : 0.0;
-    vec3 ambient = ambient_factor * base_color * 0.6;
+	// Blinn-Phong lighting model
+	vec3 v = normalize(-v2f_frag_pos);
+	vec3 l = normalize(light_position - v2f_frag_pos);
+	vec3 n = normalize(v2f_normal);
+	float dist_frag_light = length(v2f_frag_pos - light_position);
 
-    float dist = length(light_position - frag_position);
-    float atten = 1.0 / pow(dist, 0.25);
+	vec3 h = normalize(l + v);
 
-    vec3 color = ambient + atten * light_color * base_color * (diff + spec);
-    gl_FragColor = vec4(color, alpha);
+    // Compute diffuse
+    vec3 diffuse = vec3(0.0);
+	diffuse = material_color * max(dot(n, l), 0.0);
+	
+	// Compute specular
+    vec3 specular = vec3(0.0);
+	float s = dot(h, n);
+	if (s > 0.0){
+		specular = material_color * pow(s, shininess);
+	}
+
+	// Compute ambient
+	vec3 ambient = ambient_factor * material_color * material_ambient;
+
+	//float attenuation = 1. / (dist_frag_light * dist_frag_light);
+	
+	// Compute pixel color
+    vec3 color = ambient + (light_color * (diffuse + specular));
+	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }
