@@ -7,7 +7,7 @@ import { deg_to_rad, mat4_to_string, vec_to_string, mat4_matmul_many } from "../
  */
 export class POVCamera {
 
-    MAX_MOV_SPEED = 0.1;
+    MAX_MOV_SPEED = 10;
     MIN_MOV_SPEED = 0.01;
     MAX_ROT_SENSITIVITY = 0.02;
     MIN_ROT_SENSITIVITY = 0.001;

@@ -131,11 +131,6 @@ export const fish = new DiffuseMaterial({
 });
 
 
-export const fish = new DiffuseMaterial({
-    texture: 'fish.png'
-});
-
-
 export const pine = new DiffuseMaterial({
     texture: 'pine.png',
     shininess: 0.5
@@ -148,5 +143,6 @@ export function diffuse(texture = default_texture, is_translucent = false, apply
         is_translucent: is_translucent,
         apply_normal_map: apply_normal_map,
         normal_map: normal_map,
+        properties: ['no_bloom']
     });
 }

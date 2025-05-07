@@ -144,7 +144,7 @@ async function main() {
   const tutorial_scene = new TutorialScene(resource_manager);
   const milestone_scene = new MilestoneScene(resource_manager,procedural_texture_generator);
 
-  const active_scene = milestone_scene;   // Assign the scene to be rendered to active_scene
+  const active_scene = demo_scene;   // Assign the scene to be rendered to active_scene
   
   /*---------------------------------------------------------------
     5. UI Instantiation

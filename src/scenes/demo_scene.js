@@ -193,7 +193,7 @@ export class DemoScene extends Scene {
 
     create_slider(
       "movement speed", 
-      [0, 100], 
+      [0, 10000], 
       (i) => {
         const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
         this.camera.setMovSpeed(new_speed);
