@@ -86,6 +86,7 @@ class TerrainMaterial extends Material {
         this.properties.push("terrain");
         this.properties.push("no_blinn_phong");
         this.properties.push("no_bloom");
+        this.properties.push("no_bloom");
     }
 }
 
@@ -99,6 +100,9 @@ class TerrainMaterial extends Material {
  */
 export const sunset_sky = new BackgroundMaterial({
     texture: 'kloppenheim_07_puresky_blur.jpg'
+});
+export const night_sky = new BackgroundMaterial({
+    texture: 'night_sky.jpg'
 });
 
 export const gray = new DiffuseMaterial({
@@ -121,6 +125,16 @@ export const terrain = new TerrainMaterial({
     grass_color: [0.33, 0.43, 0.18],
     peak_color: [0.8, 0.5, 0.4]
 });
+
+export const fish = new DiffuseMaterial({
+    texture: 'fish.png'
+});
+
+
+export const fish = new DiffuseMaterial({
+    texture: 'fish.png'
+});
+
 
 export const pine = new DiffuseMaterial({
     texture: 'pine.png',

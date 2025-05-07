@@ -20,6 +20,8 @@ import { ProceduralTextureGenerator } from "./render/procedural_texture_generato
 import { TutorialScene } from "./scenes/tutorial_scene.js";
 import { DemoScene } from "./scenes/demo_scene.js";
 import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
+import { MilestoneScene } from "./scenes/milestone_scene.js";
+// import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 
 DOM_loaded_promise.then(main)
 
@@ -44,6 +46,7 @@ async function main() {
 
   // The <canvas> object (HTML element for drawing graphics) was created by REGL: we take a handle to it
   const canvas_elem = document.getElementsByTagName('canvas')[0]
+  canvas_elem.tabIndex = 1;
   {
     // Resize canvas to fit the window
     function resize_canvas() {
@@ -92,9 +95,36 @@ async function main() {
     }
   })
 
-  // zoom
-  canvas_elem.addEventListener('wheel', (event) => {
-    active_scene.camera.zoom_action(event.deltaY);
+  const keysDown = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  };
+  const forwardKeys = ['W', 'w', 'ArrowUp'];
+  const backwardKeys = ['S', 's', 'ArrowDown'];
+  const leftKeys = ['A', 'a', 'ArrowLeft'];
+  const rightKeys = ['D', 'd', 'ArrowRight'];
+  const upKeys = [' '];
+  const downKeys = ['Shift'];
+
+  canvas_elem.addEventListener('keydown', (event) => {
+    if (forwardKeys.includes(event.key)) keysDown['forward'] = true;
+    if (backwardKeys.includes(event.key)) keysDown['backward'] = true;
+    if (leftKeys.includes(event.key)) keysDown['left'] = true;
+    if (rightKeys.includes(event.key)) keysDown['right'] = true;
+    if (upKeys.includes(event.key)) keysDown['up'] = true;
+    if (downKeys.includes(event.key)) keysDown['down'] = true;
+  })
+  canvas_elem.addEventListener('keyup', (event) => {
+    if (forwardKeys.includes(event.key)) keysDown['forward'] = false;
+    if (backwardKeys.includes(event.key)) keysDown['backward'] = false;
+    if (leftKeys.includes(event.key)) keysDown['left'] = false;
+    if (rightKeys.includes(event.key)) keysDown['right'] = false;
+    if (upKeys.includes(event.key)) keysDown['up'] = false;
+    if (downKeys.includes(event.key)) keysDown['down'] = false;
   })
 
   /*---------------------------------------------------------------
@@ -111,8 +141,10 @@ async function main() {
   // Instantiate scenes. Multiple different scenes can be set up here: 
   // which one is rendered depends on the value of the active_scene variable.
   const demo_scene = new DemoScene(resource_manager, procedural_texture_generator);
+  const tutorial_scene = new TutorialScene(resource_manager);
+  const milestone_scene = new MilestoneScene(resource_manager,procedural_texture_generator);
 
-  const active_scene = demo_scene;   // Assign the scene to be rendered to active_scene
+  const active_scene = milestone_scene;   // Assign the scene to be rendered to active_scene
   
   /*---------------------------------------------------------------
     5. UI Instantiation
@@ -136,6 +168,21 @@ async function main() {
     // Reset canvas
     const background_color = [0.0, 0.0, 0.0, 1];
     regl.clear({ color: background_color });
+
+    /*---------------------------------------------------------------
+      Update the camera position
+    ---------------------------------------------------------------*/
+
+    if(active_scene.camera.is_animation_ongoing()){
+      active_scene.camera.animate(dt);
+    }else{
+      active_scene.camera.move_action(
+        (keysDown['forward'] ? 1 : 0) - (keysDown['backward'] ? 1 : 0),
+        (keysDown['right'] ? 1 : 0) - (keysDown['left'] ? 1 : 0),
+        (keysDown['up'] ? 1 : 0) - (keysDown['down'] ? 1 : 0)
+      );
+    }
+    
     
     /*---------------------------------------------------------------
       Update the current frame data

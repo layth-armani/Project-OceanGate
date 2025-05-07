@@ -1,4 +1,5 @@
-import { TurntableCamera } from "../scene_resources/camera.js"
+
+import { POVCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
 import { cg_mesh_make_uv_sphere, cg_mesh_make_square} from "../cg_libraries/cg_mesh.js"
 import { terrain_build_mesh } from "../scene_resources/dendry_terrain_generation.js"
@@ -189,7 +190,126 @@ export class DemoScene extends Scene {
     create_slider("Height light 2 ", [0, n_steps_slider], (i) => {
       this.ui_params.light_height[1] = min_light_height_2 + i * (max_light_height_2 - min_light_height_2) / n_steps_slider;
     });
+
+    create_slider(
+      "movement speed", 
+      [0, 100], 
+      (i) => {
+        const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
+        this.camera.setMovSpeed(new_speed);
+      }
+    )
+
+    create_slider(
+      "sensitivity",
+      [0, 100], 
+      (i) => {
+        const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
+        this.camera.setRotSensitivity(new_sens);
+      }
+    )
+    
+
+    // Add button to generate random terrain
+    create_button("Random terrain", () => {this.random_terrain()});
   }
+
+  /**
+   * Generate a random terrain
+   */
+  random_terrain(){
+    const x = Math.round((Math.random()-0.5)*1000);
+    const y = Math.round((Math.random()-0.5)*1000);
+    console.log(`seed: [${x}, ${y}]`)
+    this.recompute_terrain([x, y]);
+  }
+
+  /**
+   * Allow the generate a new terrain without recreating the whole scene
+   * @param {*} offset the new offset to compute the noise for the heightmap
+   */
+  recompute_terrain(offset){
+    // Clear the list of dynamic objects
+    this.dynamic_objects = [];
+
+    // Compute a new height map
+    const height_map = this.procedural_texture_generator.compute_texture(
+      "perlin_heightmap", 
+      noise_functions.FBM_for_terrain, 
+      {width: 96, height: 96, mouse_offset: offset}
+    );
+
+    // Recompute the terrain mesh with the new heigthmap and replace
+    // the old one in the resources manager
+    const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
+    this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
+    
+    // Place the trees on this new terrain
+    place_random_trees(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, this.WATER_LEVEL);
+
+    // Reinitialize the actors actions
+    this.initialize_actor_actions();
+
+    // Update the scene objects
+    this.objects = this.static_objects.concat(this.dynamic_objects);
+  }
+
+}
+
+
+/**
+ * Dynamically place some object on a mesh. 
+ * Iterate over all vertices and randomly decide whether 
+ * to place an object on it or not.
+ * @param {*} objects 
+ * @param {*} actors 
+ * @param {*} terrain_mesh 
+ * @param {*} TERRAIN_SCALE 
+ * @param {*} water_level 
+ */
+function place_random_trees(objects, actors, terrain_mesh, TERRAIN_SCALE, water_level){
+  
+  const up_vector = [0,0,1] 
+
+  // Iterate ovew the terrain vertices as a pair vertex (the position) 
+  // and its index in the array used for pseudo-randomness
+  terrain_mesh.vertex_positions.forEach((vertex, index) => {
+      const position = vertex;
+      const normal = terrain_mesh.vertex_normals[index];
+
+      // Decide wether or not place something on this vertex
+      const result = decide(index);
+
+      // If the decision function return 1 we choose to place a tree
+      if (result == 1){
+        // Check vertices is above water, below mountain, with gentle slope, and far from the boundary
+        if(
+          position[2] > water_level
+          && position[2] < 0.1 // mountain level
+          && vec3.angle(up_vector, normal) < Math.PI/180*40 
+          && position[0] > -0.45 && position[0] < 0.45  // avoid boundary
+          && position[1] > -0.45 && position[1] < 0.45
+        ){
+          // Add a new tree to the list of scene objects and actors
+          const tree = new_tree(position, TERRAIN_SCALE, index);
+          objects.push(tree);
+          actors[`tree_${objects.length}`] = tree;
+        }
+      }
+  });
+}
+
+
+/**
+ * Update the scale and increase it linearly with time
+ * @param {*} scale scale to update 
+ * @param {*} dt 
+ */
+function grow_tree(scale, dt){
+  const grow_factor = 0.1;
+  scale[0] = scale[0] + (dt*grow_factor);
+  scale[1] = scale[1] + (dt*grow_factor);
+  scale[2] = scale[2] + (dt*grow_factor);
 }
 
 /**

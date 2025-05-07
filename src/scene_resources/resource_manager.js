@@ -137,6 +137,8 @@ export class ResourceManager{
         return [
             'kloppenheim_07_puresky_blur.jpg',
             'pine.png',
+            'fish.png',
+            'night_sky.jpg'
           ];
     }
 
@@ -146,18 +148,24 @@ export class ResourceManager{
             'point_light_shadows.vert.glsl', 'point_light_shadows.frag.glsl',
             'flat_color.vert.glsl', 'flat_color.frag.glsl',
             'map_mixer.vert.glsl', 'map_mixer.frag.glsl',
+            'fog_mixer.vert.glsl', 'fog_mixer.frag.glsl',
             'mirror.vert.glsl', 'mirror.frag.glsl',
             'shadow_map.vert.glsl', 'shadow_map.frag.glsl',
             'cubemap_visualization.vert.glsl', 'cubemap_visualization.frag.glsl',
             'noise.vert.glsl', 'noise.frag.glsl',
             `buffer_to_screen.vert.glsl`, `buffer_to_screen.frag.glsl`,
             'terrain.vert.glsl', 'terrain.frag.glsl',
+            'bloom.vert.glsl', 'bloom.frag.glsl',
+            'gaussian_blur.vert.glsl','gaussian_blur.frag.glsl',
+            'bloom_mixer.vert.glsl', 'bloom_mixer.frag.glsl'
           ];
     }
 
     meshes_to_load() {
         return [
         "pine.obj",
+        "fish.obj",
+        "suzanne.obj",
       ];
     }
 
