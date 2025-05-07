@@ -49,8 +49,8 @@ export class DemoScene extends Scene {
       noise_functions.Sand,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: width,
-        height: height,
+        width: 1080,
+        height: 1080,
         as_texture: true
       }
     );
@@ -60,8 +60,8 @@ export class DemoScene extends Scene {
       noise_functions.DeepSea,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: width,
-        height: height,
+        width: 1080,
+        height: 1080,
         as_texture: true
       }
     );
@@ -71,8 +71,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 100,
-        height: 100,
+        width: 360,
+        height: 360,
         as_texture: true
       }
     );
@@ -82,8 +82,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral_Normal,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 100,
-        height: 100,
+        width: 360,
+        height: 360,
         as_texture: true
       }
     );
@@ -123,13 +123,6 @@ export class DemoScene extends Scene {
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
       material: MATERIALS.diffuse('sand')
-    });
-
-    this.static_objects.push({
-      translation: [-10,0,0],
-      scale: [20,20,20],
-      mesh_reference: 'mesh_vertical_square_x',
-      material: MATERIALS.diffuse('coral', true, true, 'coral_normal')
     });
 
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
@@ -205,7 +198,7 @@ export class DemoScene extends Scene {
  * @returns 
  */
 function decide(index){
-  const chance = 200; // the higher this value, the less likely it is to place an object
+  const chance = 100; // the higher this value, the less likely it is to place an object
   const idx = (pseudo_random_int(index))%chance;
   return idx
 }
@@ -242,8 +235,7 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
         coral_count++;
         const mesh_options = [
           'mesh_vertical_square_x',
-          'mesh_vertical_square_y',
-          'mesh_vertical_square_z'
+          'mesh_vertical_square_y'
         ];
 
         const min_size = 10.0, max_size = 20.0;

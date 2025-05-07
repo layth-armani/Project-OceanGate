@@ -17,6 +17,16 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
             `shadow_map.vert.glsl`, 
             `shadow_map.frag.glsl`
         );
+        this.pipeline = regl({
+            vert: this.vert_shader,
+            frag: this.frag_shader,
+            attributes: this.attributes(regl),
+            uniforms: this.uniforms(regl),
+            depth: this.depth(),            // uses dynamic mask
+            blend: this.blend(),            // uses dynamic enable
+            elements: regl.prop('mesh.faces'),
+            cull: this.cull()
+        });
     }
     
     /**
@@ -26,7 +36,9 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
      */
     render(scene_state){
         const scene = scene_state.scene;
-        const inputs = [];
+        const opaqueInputs = [];
+        const transparentInputs = [];
+
 
         for (const obj of scene.objects) {
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
@@ -38,22 +50,53 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
                 mat_model_view_projection
             } = scene.camera.object_matrices.get(obj);
 
-            inputs.push({
-                mesh: mesh,
-                mat_model_view_projection: mat_model_view_projection,
-                mat_model_view: mat_model_view,
+            const camera_z = mat_model_view[14];
+
+            const entry = {
+                mesh,
+                mat_model_view_projection,
+                mat_model_view,
                 material_texture: texture,
-                is_textured: is_textured,
-                material_base_color: obj.material.color,
-                is_translucent: is_translucent
-            });
+                is_textured,
+                is_translucent,
+                camera_z
+            };
+
+            if (is_translucent) {
+                transparentInputs.push(entry);
+            } else {
+                opaqueInputs.push(entry);
+            }
         }
 
-        this.pipeline(inputs);
+        this.pipeline(opaqueInputs);
+
+
+        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
+        this.pipeline(transparentInputs);
+
     }
 
     cull(){
-        return { enable: true }; // don't draw back face
+        return { enable: true, face: 'back'};
+    }
+
+    depth(){
+        return {
+            enable: true,
+            mask: (context, props) => !props.is_translucent,
+            func: '<='
+        };
+    }
+
+    blend(){
+        return {
+            enable: (context, props) => props.is_translucent,
+            func: {
+                srcRGB: 'src alpha', srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha', dstAlpha: 'one minus src alpha'
+            }
+        };
     }
 
     uniforms(regl){

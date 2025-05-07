@@ -24,6 +24,17 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
         // Here we instanciante the ShadowMapShaderRenderer directly into the ShadowsShaderRenderer 
         // because the latter needs to pass shadow_map render function to the env_capture to generate the cube_map 
         this.shadow_map = new ShadowMapShaderRenderer(regl, resource_manager);
+
+        this.pipeline = regl({
+            vert: this.vert_shader,
+            frag: this.frag_shader,
+            attributes: this.attributes(regl),
+            uniforms: this.uniforms(regl),
+            depth: this.depth(),            // uses dynamic mask
+            blend: this.blend(),            // uses dynamic enable
+            elements: regl.prop('mesh.faces'),
+            cull: this.cull()
+        });
     }
 
     /**
@@ -34,7 +45,8 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
     render(scene_state){
 
         const scene = scene_state.scene;
-        const inputs = [];
+        const opaqueInputs = [];
+        const transparentInputs = [];
 
         // For every light build a shadow map and do a render of the shadows
         this.regl.clear({color: [0,0,0,1]});
@@ -62,7 +74,9 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
                     mat_normals_model_view 
                 } = scene.camera.object_matrices.get(obj);
 
-                inputs.push({
+                const camera_z = mat_model_view[14];
+
+                const entry = {
                     mesh: mesh,
 
                     mat_model_view_projection: mat_model_view_projection,
@@ -76,10 +90,20 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
                     is_translucent: is_translucent,
 
                     cube_shadowmap: cube_shadowmap,
-                });
-                this.pipeline(inputs);
+                    camera_z
+                };
+    
+                if (is_translucent) {
+                    transparentInputs.push(entry);
+                } else {
+                    opaqueInputs.push(entry);
+                }
             }
+            this.pipeline(opaqueInputs);
 
+
+            transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
+            this.pipeline(transparentInputs);
                 
         });
     }
@@ -102,26 +126,28 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
     }
 
 
+    cull(){
+        return { enable: true, face: 'back'};
+    }
+
     depth(){
-        // Use the z-buffer
         return {
             enable: true,
-            mask: true,
-            func: '<=',
+            mask: (context, props) => !props.is_translucent,
+            func: '<='
         };
     }
 
     blend(){
         return {
-            enable: true,
+            enable: (context, props) => props.is_translucent,
             func: {
-                srcRGB: 'src alpha',
-                srcAlpha: 'src alpha',
-                dstRGB: 'one minus src alpha',
-                dstAlpha: 'one minus src alpha'
+                srcRGB: 'src alpha', srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha', dstAlpha: 'one minus src alpha'
             }
         };
     }
+
 
     uniforms(regl){
         return{

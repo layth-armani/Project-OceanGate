@@ -124,8 +124,6 @@ export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1
     const normals = [];
     const tex_coords = [];
     const faces = [];
-    const tangents = [];    
-    const binormals = [];  
     
     const half_size = size / 2;
     const step = size / divisions;
@@ -177,12 +175,6 @@ export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1
             vertices.push([x, y, z]);
             
             normals.push(n);
-            
-            // Add tangent (u vector) for this vertex
-            tangents.push(u);
-            
-            // Add bitangent (v vector) for this vertex
-            binormals.push(v);
             
             tex_coords.push([j / divisions, i / divisions]);
         }
