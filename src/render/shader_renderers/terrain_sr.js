@@ -43,6 +43,7 @@ export class TerrainShaderRenderer extends ShaderRenderer {
                 const { texture, is_textured } = texture_data(obj, this.resource_manager);
                 const is_translucent = obj.material.is_translucent;
 
+                
                 const normal_map = obj.material.normal_map 
                     ? this.resource_manager.get_texture(obj.material.normal_map)
                     : this.#get_texture_from_array(

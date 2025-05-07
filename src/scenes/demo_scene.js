@@ -125,6 +125,14 @@ export class DemoScene extends Scene {
       material: MATERIALS.diffuse('sand')
     });
 
+    this.static_objects.push({
+      translation: [-10,0,0],
+      scale: [20,20,20],
+      mesh_reference: 'mesh_vertical_square_x',
+      material: MATERIALS.diffuse('coral', true, true, 'coral_normal')
+    });
+    console.log(this.static_objects)
+
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
 
     // Combine the dynamic & static objects into one array
@@ -217,7 +225,7 @@ function pseudo_random_int(index) {
 function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terrain_translation){
   const up_vector = [0,0,1];
   let coral_count = 0;
-  const coral_translation = [terrain_translation[0], terrain_translation[1],terrain_translation[2]]
+  const coral_translation = [terrain_translation[0], terrain_translation[1],terrain_translation[2]-5]
 
   terrain_mesh.vertex_positions.forEach((vertex, index) => {
     const position = vertex;
@@ -251,7 +259,7 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
             translation: [...coral_translation],
             scale: [scale_val, scale_val, scale_val],
             mesh_reference: mesh_reference,
-            material: MATERIALS.normal_map('coral','coral_normal', true)
+            material:  MATERIALS.diffuse('coral', true, true, 'coral_normal')
           };
           coral.evolve = (dt) => {
             const base = scale_val;

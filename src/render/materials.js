@@ -23,6 +23,7 @@ class Material {
         this.color = default_base_color;
         this.shininess = default_shininess;
         this.is_translucent = false;
+        this.apply_normal_map = false;
         this.properties = [];
     }
 
@@ -44,13 +45,17 @@ class DiffuseMaterial extends Material {
         texture = null, 
         color = default_base_color, 
         shininess = default_shininess,
-        is_translucent = false
+        is_translucent = false,
+        apply_normal_map = false,
+        normal_map = null,
     }){
         super()
         this.texture = texture;
         this.color = color;
         this.shininess = shininess;
         this.is_translucent = is_translucent;
+        this.apply_normal_map = apply_normal_map;
+        this.normal_map = normal_map;
     }
 }
 
@@ -121,9 +126,11 @@ export function normal_map(texture = default_texture, normal_map = null, is_tran
     });
 }
 
-export function diffuse(texture = default_texture, is_translucent = false) {
+export function diffuse(texture = default_texture, is_translucent = false, apply_normal_map = false, normal_map = null) {
     return new DiffuseMaterial({
         texture: texture,
-        is_translucent: is_translucent
+        is_translucent: is_translucent,
+        apply_normal_map: apply_normal_map,
+        normal_map: normal_map,
     });
 }

@@ -117,7 +117,7 @@ export class SceneRenderer {
 
             this.blinn_phong.render(scene_state);
 
-            this.terrain.render(scene_state);
+            //this.terrain.render(scene_state);
 
 
 
@@ -126,7 +126,7 @@ export class SceneRenderer {
             this.mirror.render(scene_state, (s_s) => {
                 this.pre_processing.render(scene_state);
                 this.flat_color.render(s_s);
-                this.terrain.render(scene_state);
+                //this.terrain.render(scene_state);
                 this.blinn_phong.render(s_s);
             });
         })
@@ -156,7 +156,7 @@ export class SceneRenderer {
         // Visualize cubemap
         // this.mirror.env_capture.visualize();
         let e = performance.now()
-        console.log("Render time: ", e-s);
+        //console.log("Render time: ", e-s);
 
     }
 }

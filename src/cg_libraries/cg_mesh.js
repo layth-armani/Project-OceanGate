@@ -211,8 +211,6 @@ export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1
         vertex_normals: normals,
         faces: faces,
         vertex_tex_coords: tex_coords,
-        vertex_tangents: tangents,     
-        vertex_binormals: binormals   
     };
 }
 

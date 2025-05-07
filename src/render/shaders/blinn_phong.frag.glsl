@@ -4,6 +4,8 @@ precision mediump float;
 varying vec3 v2f_frag_pos;
 varying vec3 v2f_normal;
 varying vec2 v2f_uv;
+varying vec3 v2f_tangent;
+varying vec3 v2f_binormal;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform sampler2D material_texture;
@@ -14,6 +16,9 @@ uniform float material_shininess;
 uniform vec3 light_color;
 uniform vec3 light_position;
 uniform float ambient_factor;
+
+uniform bool apply_normal_map;
+uniform sampler2D normal_map;
 
 void main()
 {
@@ -28,13 +33,29 @@ void main()
         discard;
     }
 
-	float material_ambient = 0.6;
+    float material_ambient = 0.6;
 
-	// Blinn-Phong lighting model 
+    vec3 n;
+    
+    if (apply_normal_map) {
+        vec3 n_tangent = normalize(texture2D(normal_map, v2f_uv).rgb * 2.0 - 1.0);
+        
+        mat3 TBN = mat3(
+            normalize(v2f_tangent),
+            normalize(v2f_binormal),
+            normalize(v2f_normal)
+        );
+        
+        n = normalize(TBN * n_tangent);
+    } 
+    else {
+        n = normalize(v2f_normal);
+    }
+
+    // Blinn-Phong lighting model 
     vec3 v = normalize(-v2f_frag_pos);
     vec3 l = normalize(light_position - v2f_frag_pos);
-    vec3 n = normalize(v2f_normal);
-	vec3 h = normalize(l + v);
+    vec3 h = normalize(l + v);
 
     float h_dot_n = clamp(dot(h, n), 1e-12, 1.);
 
@@ -53,5 +74,5 @@ void main()
     // Compute pixel color
     vec3 color = ambient + (attenuation * light_color * material_color * (diffuse + specular));
 
-	gl_FragColor = vec4(color, 1.);; // output: RGBA in 0..1 range
+    gl_FragColor = vec4(color, 1.);
 }

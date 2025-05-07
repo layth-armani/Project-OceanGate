@@ -1,5 +1,6 @@
 import { texture_data, light_to_cam_view } from "../../cg_libraries/cg_render_utils.js"
 import { ResourceManager } from "../../scene_resources/resource_manager.js";
+import { normal_map } from "../materials.js";
 import { ShaderRenderer } from "./shader_renderer.js"
 
 
@@ -29,6 +30,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
         const inputs = [];
 
         let ambient_factor = scene.ambient_factor;
+        
 
         // For every light in the scene we render the blinn-phong contributions
         // Results will be added on top of each other (see this.blend())
@@ -36,11 +38,10 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
 
             // Transform light position into camera space
             const light_position_cam = light_to_cam_view(light.position, scene.camera.mat.view);
-
             for (const obj of scene.objects) {
 
                 // Check if object is Blinn-Phong shaded
-                if(this.exclude_object(obj) || obj.material.is_translucent){
+                if(this.exclude_object(obj)){
                     continue;
                 }
 
@@ -48,6 +49,19 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
                 const {texture, is_textured} = texture_data(obj, this.resource_manager);
                 const is_translucent = obj.material.is_translucent;
 
+                let normal_map = this.regl.texture({ width: 1, height: 1, data: [128, 128, 255, 255] });;
+                const apply_normal_map = obj.material.apply_normal_map;
+                
+                if (apply_normal_map) {
+                    normal_map = obj.material.normal_map 
+                    ? this.resource_manager.get_texture(obj.material.normal_map)
+                    : this.#get_texture_from_array(
+                        this.#createFlatNormalMap(texture.width, texture.height),
+                        texture.width,
+                        texture.height 
+                    );
+                }
+                
 
                 const { 
                     mat_model_view, 
@@ -72,7 +86,10 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
                     is_textured: is_textured,
                     is_translucent: is_translucent,
                     material_base_color: obj.material.color,
-                    material_shininess: obj.material.shininess
+                    material_shininess: obj.material.shininess,
+
+                    apply_normal_map: apply_normal_map,
+                    normal_map: normal_map,
                 });
 
             }
@@ -128,8 +145,32 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
             is_textured: regl.prop('is_textured'),
             material_base_color: regl.prop('material_base_color'),
             is_translucent: regl.prop('is_translucent'),
-            material_shininess: regl.prop('material_shininess')
+            material_shininess: regl.prop('material_shininess'),
+
+            apply_normal_map: regl.prop('apply_normal_map'),
+            normal_map: regl.prop('normal_map')
         };
     }
+
+    #createFlatNormalMap(width, height) {
+        const flatNormal = new Float32Array(width * height * 4); 
+        for (let i = 0; i < width * height; i++) {
+            flatNormal[i * 4 + 0] = 0.5; 
+            flatNormal[i * 4 + 1] = 0.5; 
+            flatNormal[i * 4 + 2] = 1.0; 
+            flatNormal[i * 4 + 3] = 1.0; 
+        }
+        return flatNormal;
+    }
+    
+    #get_texture_from_array(array, width, height) {
+        return this.regl.texture({
+            data: array,
+            width: width,
+            height: height,
+            format: 'rgba',
+            type: 'float'
+        });
+    } 
 }
 
