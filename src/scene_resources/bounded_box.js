@@ -62,5 +62,12 @@ export class BoundedBox{
     );
   }
 
+  random_point(){
+    return vec3.fromValues(
+      Math.random() * (this.max_pos[0] - this.min_pos[0]) + this.min_pos[0],
+      Math.random() * (this.max_pos[1] - this.min_pos[1]) + this.min_pos[1],
+      Math.random() * (this.max_pos[2] - this.min_pos[2]) + this.min_pos[2]
+    );
+  }
 
 }

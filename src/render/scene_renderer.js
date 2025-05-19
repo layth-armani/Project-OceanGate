@@ -53,6 +53,7 @@ export class SceneRenderer {
         this.create_texture_and_buffer("scene_with_bloom", {});
         this.create_texture_and_buffer("distances", {}); 
         
+        //this.create_texture_and_buffer("boids", {width: boids_count, height: 4})
 
     }
 
@@ -61,10 +62,10 @@ export class SceneRenderer {
      * @param {*} name the name for the texture (used to save & retrive data)
      * @param {*} parameters use if you need specific texture parameters
      */
-    create_texture_and_buffer(name, {wrap = 'clamp', format = 'rgba', type = 'float'}){
+    create_texture_and_buffer(name, {wrap = 'clamp', format = 'rgba', type = 'float', width = window.innerWidth, height = window.innerHeight}) {
         const regl = this.regl;
-        const framebuffer_width = window.innerWidth;
-        const framebuffer_height = window.innerHeight;
+        const framebuffer_width = width;
+        const framebuffer_height = height;
 
         // Create a regl texture and a regl buffer linked to the regl texture
         const text = regl.texture({ width: framebuffer_width, height: framebuffer_height, wrap: wrap, format: format, type: type })

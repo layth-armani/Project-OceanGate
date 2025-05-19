@@ -34,6 +34,13 @@ export class POVCamera {
         this.bounds = bounds;
     }
 
+    get_boundary(){
+        if(!this.bounds){
+            throw new Error("No bounds defined");
+        }
+        return this.bounds;
+    }
+
     set_pos(pos){
         this.pos = vec3.clone(pos);
         this.update_cam_transform();

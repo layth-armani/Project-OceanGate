@@ -192,6 +192,13 @@ async function main() {
       for (const name in active_scene.actors){
         active_scene.actors[name].evolve(dt);
       }
+      for (const name in active_scene.actors){
+        const post_evolve = active_scene.actors[name].post_evolve;
+
+        if (post_evolve){
+          post_evolve(dt);
+        }
+      }
     }
 
     // The scene state contains all information necessary to render the scene in this frame
