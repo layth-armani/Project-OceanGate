@@ -8,6 +8,7 @@ import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
 import { create_button, create_slider, create_hotkey_action } from "../cg_libraries/cg_web.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { ProceduralTextureGenerator } from "../render/procedural_texture_generator.js"
+import { BoundedBox } from "../scene_resources/bounded_box.js"
 
 export class MilestoneScene extends Scene {
 
@@ -24,6 +25,16 @@ export class MilestoneScene extends Scene {
 
     this.static_objects = [];
     this.dynamic_objects = [];
+
+    const boundary = new BoundedBox(
+      vec3.fromValues(2.37695, 0.508275, 0.690108),
+      vec3.fromValues(0.41676, -0.59381, -0.899727)
+    )
+
+    this.camera.set_boundary(boundary);
+    console.log(boundary.get_center())
+    this.camera.set_pos(boundary.get_center())
+    
     
 
     this.initialize_scene();

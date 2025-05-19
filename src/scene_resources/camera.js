@@ -30,6 +30,10 @@ export class POVCamera {
         
     }
 
+    set_boundary(bounds){
+        this.bounds = bounds;
+    }
+
     set_pos(pos){
         this.pos = vec3.clone(pos);
         this.update_cam_transform();
@@ -211,10 +215,8 @@ export class POVCamera {
      * @param {{distance_factor, angle_z, angle_y, look_at}} view 
      */
     set_preset_view(view){
-        this.distance_factor = view.distance_factor;
-        this.angle_z = view.angle_z;
-        this.angle_y = view.angle_y;
-        this.look_at = view.look_at;
+        this.pos = view.pos;
+        this.look_dir = view.look_dir;
         this.update_cam_transform();
     }
 
@@ -285,9 +287,15 @@ export class POVCamera {
      * @param {*} up_mov 
      */
     move_action(forward_mov, right_mov, up_mov){
+
+        //this.log_current_state();
+
+        
         if(forward_mov == 0 && right_mov == 0 && up_mov == 0){
             return;
         }
+        
+
         forward_mov = forward_mov * this.movement_speed;
         right_mov = right_mov * this.movement_speed;
         up_mov = up_mov * this.movement_speed;
@@ -309,7 +317,15 @@ export class POVCamera {
         vec3.add(result_mov, forward_mov_v, right_mov_v);
         vec3.add(result_mov, result_mov, up_mov_v);
 
-        vec3.add(this.pos, this.pos, result_mov);
+        const new_pos = vec3.create();
+        vec3.add(new_pos, this.pos, result_mov);
+        
+        if(this.bounds){
+            const clipped_pos = this.bounds.clip_to_bounds(new_pos);
+            vec3.copy(new_pos, clipped_pos);
+        }
+
+        vec3.copy(this.pos, new_pos);
         this.update_cam_transform();
     }
 }
