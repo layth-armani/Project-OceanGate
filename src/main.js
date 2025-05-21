@@ -20,6 +20,7 @@ import { ProceduralTextureGenerator } from "./render/procedural_texture_generato
 import { TutorialScene } from "./scenes/tutorial_scene.js";
 import { DemoScene } from "./scenes/demo_scene.js";
 import { MilestoneScene } from "./scenes/milestone_scene.js";
+import { FOG_DEFAULT_DISTANCE, FOG_MIN_DISTANCE, FOG_MAX_DISTANCE } from "./render/shader_renderers/fog_mixer_sr.js";
 // import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 
 DOM_loaded_promise.then(main)
@@ -61,10 +62,22 @@ async function main() {
    * Define here your parameters.
    */
   const ui_global_params = {
+    fog_distance: FOG_DEFAULT_DISTANCE,
     is_paused: false,
   }
 
   function initialize_ui_params(){
+
+    const n_steps_slider = 100;
+
+    create_slider(
+      "fog distance",
+      [0, n_steps_slider],
+      (i) => {
+        ui_global_params.fog_distance = FOG_MIN_DISTANCE + (i / n_steps_slider) * (FOG_MAX_DISTANCE - FOG_MIN_DISTANCE);
+      },
+      1
+    )
 
     // Bind a hotkey to hide the overlay
     create_hotkey_action("Hide overlay", "h", ()=>{toggle_overlay_visibility()});

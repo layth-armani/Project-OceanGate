@@ -196,7 +196,7 @@ export class SceneRenderer {
         //this.blur.render(scene_state, this.texture("blurred_bloom"), true);
 
 
-        this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"))
+        this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"), scene_state.ui_params.fog_distance);
     }
 }
 

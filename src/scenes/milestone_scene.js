@@ -27,8 +27,8 @@ export class MilestoneScene extends Scene {
     this.dynamic_objects = [];
 
     const boundary = new BoundedBox(
-      vec3.fromValues(2.37695, 0.508275, 0.690108),
-      vec3.fromValues(0.41676, -0.59381, -0.899727)
+      vec3.fromValues(10, 10, 10),
+      vec3.fromValues(-10, -10, -0.509727)
     )
 
     this.camera.set_boundary(boundary);
@@ -46,12 +46,12 @@ export class MilestoneScene extends Scene {
   initialize_scene(){
 
     this.lights.push({
-      position : [-4,-5,7],
+      position : [-4,-5,37],
       color: [0.75, 0.75, 0.75]
     });
 
     this.lights.push({
-      position : [-4,-5,7],
+      position : [-4,-5,37],
       color: [0.1, 0.1, 0.1]
     });
 
@@ -61,16 +61,16 @@ export class MilestoneScene extends Scene {
       {width: 96, height: 96, mouse_offset: [-12.24, 8.15]}
     );
     this.WATER_LEVEL = 0.0;
-    this.TERRAIN_SCALE = [10,10,0.5];
+    this.TERRAIN_SCALE = [70,70,0.5];
     const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
 
     this.create_random_fish(
       this.static_objects, 
-      20, 
+      200, 
       this.camera.get_boundary(),
-      {max_vel: 0.2, min_vel: 0.1, view_distance: 0.3, avoidance_distance: 0.15, alignment: 0.15, cohesion: 0.01, separation: 0.15, border: 10}
+      {max_vel: 2, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 10}
     );
 
     this.static_objects.push({
@@ -162,7 +162,15 @@ export class MilestoneScene extends Scene {
           vec3.scale(new_velocity, new_velocity, min_vel / speed);
         }
 
-        boid.velocity = new_velocity;
+        let max_velocity_change = max_vel * dt;
+
+        let velocity_change_vec = vec3.sub(vec3.create(), new_velocity, boid.velocity);
+        let velocity_change_length = vec3.length(velocity_change_vec);
+        if (velocity_change_length > max_velocity_change) {
+          vec3.scale(velocity_change_vec, velocity_change_vec, max_velocity_change / velocity_change_length);
+        }
+
+        vec3.add(boid.velocity, boid.velocity, velocity_change_vec);
       }
 
       boid.post_evolve = (dt) => {
@@ -181,25 +189,25 @@ export class MilestoneScene extends Scene {
 
     const n_steps_slider = 100;
 
-      create_slider(
-        "movement speed", 
-        [0, n_steps_slider], 
-        (i) => {
-        const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
-        this.camera.setMovSpeed(new_speed);
-        },
-        1
-      )
+    create_slider(
+      "movement speed", 
+      [0, n_steps_slider], 
+      (i) => {
+      const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
+      this.camera.setMovSpeed(new_speed);
+      },
+      1
+    )
 
-      create_slider(
-        "sensitivity",
-        [0, n_steps_slider],  
-        (i) => {
-        const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
-        this.camera.setRotSensitivity(new_sens);
-        },
-        1
-      )
+    create_slider(
+      "sensitivity",
+      [0, n_steps_slider],  
+      (i) => {
+      const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
+      this.camera.setRotSensitivity(new_sens);
+      },
+      1
+    )
 
     create_hotkey_action("Bezier Animation", "o", () => {
       this.camera.set_animation(
@@ -250,7 +258,7 @@ export class MilestoneScene extends Scene {
 
     return {
       translation: bounds.random_point(),
-      scale: [0.01, 0.01, 0.01],
+      scale: [0.1, 0.1, 0.1],
       mesh_reference: "fish.obj",
       material: MATERIALS.fish,
       is_boid: true,

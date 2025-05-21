@@ -1,7 +1,9 @@
 
 import { ShaderRenderer } from "./shader_renderer.js";
 
-
+export const FOG_MIN_DISTANCE = 10;
+export const FOG_MAX_DISTANCE = 40;
+export const FOG_DEFAULT_DISTANCE = 30;
 
 export class FogMixerShaderRenderer extends ShaderRenderer {
 
@@ -26,7 +28,7 @@ export class FogMixerShaderRenderer extends ShaderRenderer {
      * @param {*} rendered_shadows a texture containing the shadows information
      * @param {*} rendered_blinn_phong a texture with the objects colors & shading 
      */
-    render(scene_state, rendered_distances, rendered_blinn_phong){
+    render(scene_state, rendered_distances, rendered_blinn_phong, fog_distance){
 
         const scene = scene_state.scene;
         const inputs = [];
@@ -51,8 +53,8 @@ export class FogMixerShaderRenderer extends ShaderRenderer {
                 canvas_width: scene_state.frame.framebufferWidth, 
                 canvas_height: scene_state.frame.framebufferHeight,
 
+                fog_distance: fog_distance,
                 distances: rendered_distances,
-
                 blinn_phong: rendered_blinn_phong,
             });
         }
@@ -69,6 +71,7 @@ export class FogMixerShaderRenderer extends ShaderRenderer {
             canvas_width: regl.prop("canvas_width"),
             canvas_height: regl.prop("canvas_height"),
 
+            fog_distance: regl.prop("fog_distance"),
             distances: regl.prop("distances"),
             blinn_phong: regl.prop("blinn_phong"),
         };

@@ -4,12 +4,13 @@ precision mediump float;
 varying vec4 canvas_pos;
 
 // Global variables specified in "uniforms" entry of the pipeline
+uniform float fog_distance;
 uniform sampler2D distances;
 uniform sampler2D blinn_phong;
 
 void main()
 {
-    float fog_max_distance = 5.0; // @todo find correct value
+    float fog_max_distance = fog_distance; // @todo find correct value
 
     vec3 fog_factor_color = vec3(0., 0.102, 0.2); // @todo tweak this
 
@@ -19,7 +20,6 @@ void main()
     float distance_to_uv = texture2D(distances, uv).x;
 
     float fog_f = distance_to_uv / fog_max_distance;
-    fog_f *= fog_f;
     float fog_factor = min(fog_f, 1.0);
     
     vec3 phong_color = texture2D(blinn_phong, uv).rgb;

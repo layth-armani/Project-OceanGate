@@ -8,7 +8,7 @@ import { deg_to_rad, mat4_to_string, vec_to_string, mat4_matmul_many } from "../
 export class POVCamera {
 
     MAX_MOV_SPEED = 0.1;
-    MIN_MOV_SPEED = 0.01;
+    MIN_MOV_SPEED = 1;
     MAX_ROT_SENSITIVITY = 0.02;
     MIN_ROT_SENSITIVITY = 0.001;
 
@@ -212,7 +212,7 @@ export class POVCamera {
 
             normalize(up_unit_v, up_unit_v);
 
-            let mat_rot1 = mat4.targetTo(mat4.create, [0, 0, 0], [1, 0, 0], [0, 0, 1]);
+            let mat_rot1 = mat4.fromRotation(mat4.create(), Math.PI / 2, [0, -1, 0])//mat4.targetTo(mat4.create, [0, 0, 0], [0, 0, 1], [0, 0, 1]);
             let mat_rot2 = mat4.targetTo(mat4.create, [0, 0, 0], object.velocity, right_unit_v);
 
             mat4.multiply(mat_rot1, mat_rot2, mat_rot1);
