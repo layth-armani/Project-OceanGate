@@ -70,7 +70,7 @@ export class MilestoneScene extends Scene {
       this.static_objects, 
       20, 
       this.camera.get_boundary(),
-      {max_vel: 0.4, min_vel: 0.1, view_distance: 0.3, avoidance_distance: 0.15, alignment: 0.15, cohesion: 0.01, separation: 0.15, border: 0.1}
+      {max_vel: 0.2, min_vel: 0.1, view_distance: 0.3, avoidance_distance: 0.15, alignment: 0.15, cohesion: 0.01, separation: 0.15, border: 10}
     );
 
     this.static_objects.push({
@@ -87,13 +87,6 @@ export class MilestoneScene extends Scene {
       material: MATERIALS.terrain
     });
 
-
-    this.static_objects.push({
-      translation: [1.50, 0.0, 0.0],
-      scale:[0.30, 0.30, 0.30],
-      mesh_reference: 'suzanne.obj',
-      material: MATERIALS.gold
-    });
 
     this.objects = this.static_objects;
 

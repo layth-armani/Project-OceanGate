@@ -190,7 +190,35 @@ export class POVCamera {
         // Construct mat_model_to_world from translation and scale.
         // If we wanted to have a rotation too, we could use mat4.fromRotationTranslationScale.
         const mat_model_to_world = mat4.create();
+        
         mat4.fromTranslation(mat_model_to_world, object.translation);
+        
+        if(object.velocity){
+
+
+            const right_unit_v = vec3.create();
+            vec3.cross(
+                right_unit_v,
+                object.velocity,
+                vec3.fromValues(0, 0, -1)
+            )
+
+            const up_unit_v = vec3.create();
+            vec3.cross(
+                up_unit_v,
+                object.velocity,
+                right_unit_v
+            )
+
+            normalize(up_unit_v, up_unit_v);
+
+            let mat_rot1 = mat4.targetTo(mat4.create, [0, 0, 0], [1, 0, 0], [0, 0, 1]);
+            let mat_rot2 = mat4.targetTo(mat4.create, [0, 0, 0], object.velocity, right_unit_v);
+
+            mat4.multiply(mat_rot1, mat_rot2, mat_rot1);
+            mat4.multiply(mat_model_to_world, mat_model_to_world, mat_rot1);
+            
+        }
         mat4.scale(mat_model_to_world, mat_model_to_world, object.scale);
 
         const mat_model_view = mat4.create();
