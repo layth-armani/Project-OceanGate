@@ -9,7 +9,9 @@ void main(){
 
     // get uv coordinates in the canvas 
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+    if(texture2D(texture, uv).a < 0.1)discard;
     vec3 color = texture2D(texture, uv).rgb;
+    
 
     const vec3 luminance = vec3(0.2126, 0.7152, 0.0722);
     float brightness = dot(color, luminance);

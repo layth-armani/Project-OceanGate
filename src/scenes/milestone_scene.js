@@ -1,7 +1,7 @@
 import { POVCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
 import { cg_mesh_make_uv_sphere } from "../cg_libraries/cg_mesh.js"
-import { terrain_build_mesh } from "../scene_resources/terrain_generation.js"
+import { terrain_build_mesh } from "../scene_resources/dendry_terrain_generation.js"
 import { noise_functions } from "../render/shader_renderers/noise_sr.js"
 import { Scene } from "./scene.js"
 import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
@@ -52,9 +52,14 @@ export class MilestoneScene extends Scene {
       noise_functions.FBM_for_terrain, 
       {width: 96, height: 96, mouse_offset: [-12.24, 8.15]}
     );
+    const dendry_height_map = this.procedural_texture_generator.compute_texture(
+      "dendry_heightmap",
+      noise_functions.Dendry, 
+      { width: 96, height: 96, mouse_offset: [-12.24, 8.15] }
+    );
     this.WATER_LEVEL = 0.0;
     this.TERRAIN_SCALE = [10,10,0.5];
-    const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
+    const terrain_mesh = terrain_build_mesh(height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
 

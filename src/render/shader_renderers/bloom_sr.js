@@ -8,51 +8,76 @@ export class BloomShaderRenderer extends ShaderRenderer{
             `bloom.vert.glsl`,
             `bloom.frag.glsl`
         );
+        
+        // Override pipeline to support transparency sorting
+        this.pipeline = regl({
+            vert: this.vert_shader,
+            frag: this.frag_shader,
+            attributes: this.attributes(regl),
+            uniforms: this.uniforms(regl),
+            depth: this.depth(),
+            blend: this.blend(),
+            elements: regl.prop('mesh.faces'),
+            cull: this.cull()
+        });
     }
 
-
     render(scene_state, texture){
-
         const scene = scene_state.scene;
-        const inputs = [];
+        const opaqueInputs = [];
+        const transparentInputs = [];
+        const threshold = 0.75;
 
         for(const obj of scene.objects){
             if(this.exclude_object(obj)) continue;
 
-            const threshold = 0.75;
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
+            const is_translucent = obj.material.is_translucent || false;
 
             const { 
                 mat_model_view, 
                 mat_model_view_projection, 
                 mat_normals_model_view 
             } = scene.camera.object_matrices.get(obj);
+            
+            // Compute camera-space depth for sorting
+            const camera_z = mat_model_view[14];
 
-            inputs.push({
+            const entry = {
                 mesh: mesh,
-
-                mat_model_view_projection : mat_model_view_projection,
+                mat_model_view_projection: mat_model_view_projection,
                 mat_model_view: mat_model_view,
                 mat_normals_model_view: mat_normals_model_view,
-
                 threshold: threshold,
                 texture: texture,
-                
-            });
+                is_translucent: is_translucent,
+                camera_z: camera_z
+            };
 
+            if (is_translucent) {
+                transparentInputs.push(entry);
+            } else {
+                opaqueInputs.push(entry);
+            }
         }
 
-        this.pipeline(inputs);
+        // Draw opaque objects first
+        this.pipeline(opaqueInputs);
+        
+        // Sort transparent objects back to front and render them
+        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
+        this.pipeline(transparentInputs);
     }
 
     blend(){
-        // Additive blend mode
         return {
             enable: true,
             func: {
-                src: 1,
-                dst: 1,
-            },
+                srcRGB: (context, props) => props.is_translucent ? 'src alpha' : 1,
+                srcAlpha: (context, props) => props.is_translucent ? 'src alpha' : 1,
+                dstRGB: (context, props) => props.is_translucent ? 'one minus src alpha' : 1,
+                dstAlpha: (context, props) => props.is_translucent ? 'one minus src alpha' : 1
+            }
         };
     }
 
@@ -63,8 +88,8 @@ export class BloomShaderRenderer extends ShaderRenderer{
     depth(){
         return {
             enable: true,
-            mask: true,
-            func: '<=',
+            mask: (context, props) => !props.is_translucent,
+            func: '<='
         };
     }
 
@@ -77,8 +102,7 @@ export class BloomShaderRenderer extends ShaderRenderer{
             material_base_color: regl.prop('material_base_color'),
             threshold: regl.prop('threshold'),
             texture: regl.prop('texture'),
+            is_translucent: regl.prop('is_translucent')
         };
     }
-
-
 }

@@ -1,4 +1,3 @@
-
 import { POVCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
 import { cg_mesh_make_uv_sphere, cg_mesh_make_square} from "../cg_libraries/cg_mesh.js"
@@ -37,13 +36,13 @@ export class DemoScene extends Scene {
 
     // Add lights
     this.lights.push({
-      position : [0,0,25],
+      position : [0,0,2.5],  // Adjusted from [0,0,25]
       color: [0.75, 0.75, 0.75]
     });
     
     const width = 100;
     const height = 100;
-    const terrain_translation = [0, 0, -20];
+    const terrain_translation = [0, 0, -2];  // Adjusted from [0, 0, -20]
 
     this.procedural_texture_generator.compute_texture(
       "sand", 
@@ -101,7 +100,7 @@ export class DemoScene extends Scene {
       { width, height, mouse_offset: [-12.24, 8.15] }
     );
     
-    this.TERRAIN_SCALE = [200, 200, 20];
+    this.TERRAIN_SCALE = [20, 20, 2];
     const terrain_mesh = terrain_build_mesh(perlin_height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
@@ -114,7 +113,7 @@ export class DemoScene extends Scene {
     // Add some meshes to the static objects list
     this.static_objects.push({
       translation: [0, 0, 0],
-      scale: [100., 100., 100.],
+      scale: [10, 10, 10],
       mesh_reference: 'mesh_sphere_env_map',
       material: MATERIALS.diffuse('deep_sea')
     });
@@ -143,7 +142,6 @@ export class DemoScene extends Scene {
   initialize_actor_actions(){
     
     for (const name in this.actors) {
-      // Pine tree
       if (name.includes("coral")){
         const coral = this.actors[name];
         coral.evolve;
@@ -166,7 +164,7 @@ export class DemoScene extends Scene {
    */
   initialize_ui_params(){
 
-    this.ui_params.light_height = [7, 6];
+    this.ui_params.light_height = [0.7, 0.6];
 
     // Set preset view
     create_hotkey_action("Preset view", "1", () => {
@@ -180,20 +178,20 @@ export class DemoScene extends Scene {
     
     // Create a slider to change the height of each light
     const n_steps_slider = 100;
-    const min_light_height_1 = 7;
-    const max_light_height_1 = 9;
+    const min_light_height_1 = 0.7; 
+    const max_light_height_1 = 0.9; 
     create_slider("Height light 1 ", [0, n_steps_slider], (i) => {
       this.ui_params.light_height[0] = min_light_height_1 + i * (max_light_height_1 - min_light_height_1) / n_steps_slider;
     });
-    const min_light_height_2 = 6;
-    const max_light_height_2 = 8;
+    const min_light_height_2 = 0.6;  
+    const max_light_height_2 = 0.8;  
     create_slider("Height light 2 ", [0, n_steps_slider], (i) => {
       this.ui_params.light_height[1] = min_light_height_2 + i * (max_light_height_2 - min_light_height_2) / n_steps_slider;
     });
 
     create_slider(
       "movement speed", 
-      [0, 10000], 
+      [0, 100], 
       (i) => {
         const new_speed = this.camera.MIN_MOV_SPEED + (i / n_steps_slider) * (this.camera.MAX_MOV_SPEED - this.camera.MIN_MOV_SPEED);
         this.camera.setMovSpeed(new_speed);
@@ -238,15 +236,19 @@ export class DemoScene extends Scene {
       noise_functions.FBM_for_terrain, 
       {width: 96, height: 96, mouse_offset: offset}
     );
+    const d_height_map = this.procedural_texture_generator.compute_texture(
+      "dendry_heightmap", 
+      noise_functions.Dendry, 
+      {width: 96, height: 96, mouse_offset: offset}
+    );
 
     // Recompute the terrain mesh with the new heigthmap and replace
     // the old one in the resources manager
-    const terrain_mesh = terrain_build_mesh(height_map, this.WATER_LEVEL);
+    const terrain_mesh = terrain_build_mesh(height_map, d_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     
     // Place the trees on this new terrain
-    place_random_trees(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, this.WATER_LEVEL);
-
+    place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, this.static_objects[1].translation);
     // Reinitialize the actors actions
     this.initialize_actor_actions();
 
@@ -257,60 +259,6 @@ export class DemoScene extends Scene {
 }
 
 
-/**
- * Dynamically place some object on a mesh. 
- * Iterate over all vertices and randomly decide whether 
- * to place an object on it or not.
- * @param {*} objects 
- * @param {*} actors 
- * @param {*} terrain_mesh 
- * @param {*} TERRAIN_SCALE 
- * @param {*} water_level 
- */
-function place_random_trees(objects, actors, terrain_mesh, TERRAIN_SCALE, water_level){
-  
-  const up_vector = [0,0,1] 
-
-  // Iterate ovew the terrain vertices as a pair vertex (the position) 
-  // and its index in the array used for pseudo-randomness
-  terrain_mesh.vertex_positions.forEach((vertex, index) => {
-      const position = vertex;
-      const normal = terrain_mesh.vertex_normals[index];
-
-      // Decide wether or not place something on this vertex
-      const result = decide(index);
-
-      // If the decision function return 1 we choose to place a tree
-      if (result == 1){
-        // Check vertices is above water, below mountain, with gentle slope, and far from the boundary
-        if(
-          position[2] > water_level
-          && position[2] < 0.1 // mountain level
-          && vec3.angle(up_vector, normal) < Math.PI/180*40 
-          && position[0] > -0.45 && position[0] < 0.45  // avoid boundary
-          && position[1] > -0.45 && position[1] < 0.45
-        ){
-          // Add a new tree to the list of scene objects and actors
-          const tree = new_tree(position, TERRAIN_SCALE, index);
-          objects.push(tree);
-          actors[`tree_${objects.length}`] = tree;
-        }
-      }
-  });
-}
-
-
-/**
- * Update the scale and increase it linearly with time
- * @param {*} scale scale to update 
- * @param {*} dt 
- */
-function grow_tree(scale, dt){
-  const grow_factor = 0.1;
-  scale[0] = scale[0] + (dt*grow_factor);
-  scale[1] = scale[1] + (dt*grow_factor);
-  scale[2] = scale[2] + (dt*grow_factor);
-}
 
 /**
  * Given a vertex, decide wether to place something on it or not
@@ -358,12 +306,12 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
           'mesh_vertical_square_y'
         ];
 
-        const min_size = 10.0, max_size = 20.0;
+        const min_size = 1.0, max_size = 2.0; 
         const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
         const coral_translation = vec3.add([0,0,0],
-            vec3.mul([0,0,0], TERRAIN_SCALE, position),
-            terrain_translation
-        );
+          vec3.mul([0,0,0], TERRAIN_SCALE, position),
+          [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 0.1]  
+      );
 
         const coral_panes = mesh_options.map((mesh_reference, i) => {
           const coral = {
@@ -374,7 +322,7 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
           };
           coral.evolve = (dt) => {
             const base = scale_val;
-            const pulse = 1. * Math.sin(Date.now() * 0.001 + index);
+            const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
             coral.scale = [base + pulse, base + pulse, base + pulse];
           };
           return coral;

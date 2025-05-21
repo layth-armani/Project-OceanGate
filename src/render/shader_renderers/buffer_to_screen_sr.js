@@ -1,8 +1,4 @@
-
 import { ShaderRenderer } from "./shader_renderer.js";
-
-
-
 
 export class BufferToScreenShaderRenderer extends ShaderRenderer {
 
@@ -18,42 +14,79 @@ export class BufferToScreenShaderRenderer extends ShaderRenderer {
             `buffer_to_screen.vert.glsl`, 
             `buffer_to_screen.frag.glsl`
         );
-    }
-
-    /**
-     * 
-     * @param {*} mesh_quad_2d a basic square mesh
-     * @param {*} buffer_to_draw the buffer to be drawn on the canvas
-     */
-    render(mesh_quad_2d, buffer_to_draw){
-
-        const inputs = [];
         
-        inputs.push({
-            mesh_quad_2d: mesh_quad_2d,
-            buffer_to_draw : buffer_to_draw,
-        })
-
-        this.pipeline(inputs);
-    }
-
-    // Overwrite the pipeline
-    init_pipeline(){
-        const regl = this.regl
-
-        return regl({
+        // Initialize the pipeline with support for transparency
+        this.pipeline = regl({
             attributes: {
                 vertex_positions: regl.prop('mesh_quad_2d.vertex_positions')
             },
-
             elements: regl.prop('mesh_quad_2d.faces'),
-
             uniforms: {
                 buffer_to_draw: regl.prop('buffer_to_draw'),
+                is_translucent: regl.prop('is_translucent')
             },
-            
+            depth: {
+                enable: true,
+                mask: (context, props) => !props.is_translucent,
+                func: '<='
+            },
+            blend: {
+                enable: (context, props) => props.is_translucent,
+                func: {
+                    srcRGB: 'src alpha',
+                    srcAlpha: 'src alpha',
+                    dstRGB: 'one minus src alpha',
+                    dstAlpha: 'one minus src alpha'
+                }
+            },
             vert: this.vert_shader,
-            frag: this.frag_shader,
-        })
-    } 
+            frag: this.frag_shader
+        });
+    }
+
+    /**
+     * Enhanced version that can handle multiple buffers with transparency sorting
+     * @param {*} mesh_quad_2d a basic square mesh
+     * @param {*} buffers_to_draw array of {buffer, depth, is_translucent} objects or a single buffer
+     */
+    render(mesh_quad_2d, buffers_to_draw){
+        // Handle both single buffer and array of buffers
+        const bufferEntries = Array.isArray(buffers_to_draw) ? buffers_to_draw : [{ 
+            buffer: buffers_to_draw, 
+            depth: 0,
+            is_translucent: false 
+        }];
+
+        const opaqueInputs = [];
+        const transparentInputs = [];
+
+        // Process each buffer
+        for (const entry of bufferEntries) {
+            const buffer = entry.buffer || entry;
+            const depth = entry.depth || 0;
+            const is_translucent = entry.is_translucent || false;
+
+            const renderInput = {
+                mesh_quad_2d: mesh_quad_2d,
+                buffer_to_draw: buffer,
+                is_translucent: is_translucent,
+                depth: depth
+            };
+
+            if (is_translucent) {
+                transparentInputs.push(renderInput);
+            } else {
+                opaqueInputs.push(renderInput);
+            }
+        }
+
+        // Draw opaque buffers first
+        this.pipeline(opaqueInputs);
+        
+        // Sort transparent buffers back-to-front and draw them
+        if (transparentInputs.length > 0) {
+            transparentInputs.sort((a, b) => b.depth - a.depth);
+            this.pipeline(transparentInputs);
+        }
+    }
 }

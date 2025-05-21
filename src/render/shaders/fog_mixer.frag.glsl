@@ -31,6 +31,7 @@ void main()
     if (fog_factor > 0.0){
         color = fog_color;
     }
+    if(texture2D(blinn_phong, uv).a < 0.1)discard;
 
     gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }
