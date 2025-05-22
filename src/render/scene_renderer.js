@@ -170,10 +170,6 @@ export class SceneRenderer {
             this.shadow_map.render(scene_state);
         })
 
-        this.render_in_texture("distances", () =>{
-
-            this.shadow_map.render(scene_state);
-        })
 
         /*---------------------------------------------------------------
             3. Compositing
@@ -198,9 +194,9 @@ export class SceneRenderer {
 
 
 
-        this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
-        this.bloom.render(scene_state, this.texture("with_shadows"));
-        this.blur.render(scene_state, this.texture("blurred_bloom"), true);
+        //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+        //this.bloom.render(scene_state, this.texture("with_shadows"));
+        //this.blur.render(scene_state, this.texture("blurred_bloom"), true);
 
 
         this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"))

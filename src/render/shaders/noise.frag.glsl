@@ -489,12 +489,12 @@ vec4 tex_coral(vec2 point) {
     float branch_mask = (fb + fb * sk*2.) *1.2;
 
  
-    branch_mask = smoothstep(0.7, 1., branch_mask);
+    branch_mask = smoothstep(0.0, 1., branch_mask);
 
     float detail = perlin_noise(point * 50.0) * 0.5 + 0.5;
     vec3 coral_base = mix(vec3(1.0, 0.5, 0.3), vec3(1.0, 0.7, 0.5), detail);
 
-    return vec4(coral_base, 1.-branch_mask);
+    return vec4(coral_base, branch_mask);
 }
 
 // ==============================================================
@@ -509,5 +509,5 @@ vec3 tex_coral_normal(vec2 point) {
     vec3 dx = vec3(eps, 0.0, hR - hL);
     vec3 dy = vec3(0.0, eps, hU - hD);
     vec3 normal = normalize(cross(dy, dx));
-    return 0.-normal;
+    return normal;
 }

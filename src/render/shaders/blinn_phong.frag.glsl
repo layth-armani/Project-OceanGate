@@ -6,6 +6,7 @@ varying vec3 v2f_normal;
 varying vec2 v2f_uv;
 varying vec3 v2f_tangent;
 varying vec3 v2f_binormal;
+varying float flip;
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform sampler2D material_texture;
@@ -38,13 +39,18 @@ void main()
     vec3 n;
     
     if (apply_normal_map) {
-        vec3 n_tangent = normalize(texture2D(normal_map, v2f_uv).rgb * 2.0 - 1.0);
-        
+        vec3 n_tangent =  normalize(texture2D(normal_map, v2f_uv).rgb * 2.0 - 1.0);
+        float PI = acos(-1.0);
+
         mat3 TBN = mat3(
             normalize(v2f_tangent),
             normalize(v2f_binormal),
             normalize(v2f_normal)
         );
+        if (gl_FrontFacing) {
+            n_tangent = - n_tangent;    
+        }
+
         
         n = normalize(TBN * n_tangent);
     } 

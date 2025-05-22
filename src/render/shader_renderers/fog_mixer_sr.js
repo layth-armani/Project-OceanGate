@@ -38,8 +38,8 @@ export class FogMixerShaderRenderer extends ShaderRenderer {
     render(scene_state, rendered_distances, rendered_blinn_phong){
 
         const scene = scene_state.scene;
-        const opaqueInputs = [];
-        const transparentInputs = [];
+        const inputs = [];
+       
 
         for (const obj of scene.objects) {
 
@@ -69,49 +69,37 @@ export class FogMixerShaderRenderer extends ShaderRenderer {
                 camera_z: camera_z
             };
 
-            if (is_translucent) {
-                transparentInputs.push(entry);
-            } else {
-                opaqueInputs.push(entry);
-            }
+            inputs.push(entry)
         }
 
-        // Draw opaque objects first with depth writes enabled
-        this.pipeline(opaqueInputs);
+        this.pipeline(inputs);
         
-        // Sort transparent objects back-to-front and render them with appropriate blending
-        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
-        this.pipeline(transparentInputs);
     }
 
     /**
-     * Dynamic depth configuration:
-     * - Enable depth testing for all objects
-     * - Disable depth writing for transparent objects
+     *
      */
     depth(){
         return {
             enable: true,
-            mask: (context, props) => !props.is_translucent,
+            mask: true,
             func: '<='
         };
     }
 
     /**
-     * Dynamic blend configuration:
-     * - Enable blending only for transparent objects
-     * - Use alpha blending for transparent parts
+     * 
      */
     blend(){
         return {
-            enable: (context, props) => props.is_translucent,
-            func: {
-                srcRGB: 'src alpha', 
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
                 srcAlpha: 'src alpha',
-                dstRGB: 'one minus src alpha', 
+                dstRGB: 'one minus src alpha',
                 dstAlpha: 'one minus src alpha'
+              }
             }
-        };
     }
 
     uniforms(regl){

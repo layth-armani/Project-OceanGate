@@ -38,8 +38,8 @@ export class BloomMixerShaderRenderer extends ShaderRenderer {
      */
     render(scene_state, rendered_base_shadows, rendered_bloom){
         const scene = scene_state.scene;
-        const opaqueInputs = [];
-        const transparentInputs = [];
+        const inputs = [];
+        
 
         for (const obj of scene.objects) {
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
@@ -65,19 +65,12 @@ export class BloomMixerShaderRenderer extends ShaderRenderer {
                 camera_z: camera_z
             };
 
-            if (is_translucent) {
-                transparentInputs.push(entry);
-            } else {
-                opaqueInputs.push(entry);
-            }
+            inputs.push(entry)
         }
 
         // Draw opaque objects first with depth writes enabled
-        this.pipeline(opaqueInputs);
+        this.pipeline(inputs);
         
-        // Sort transparent objects back-to-front and render them with appropriate blending
-        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
-        this.pipeline(transparentInputs);
     }
 
     /**
@@ -88,7 +81,7 @@ export class BloomMixerShaderRenderer extends ShaderRenderer {
     depth(){
         return {
             enable: true,
-            mask: (context, props) => !props.is_translucent,
+            mask: true,
             func: '<='
         };
     }
@@ -100,14 +93,14 @@ export class BloomMixerShaderRenderer extends ShaderRenderer {
      */
     blend(){
         return {
-            enable: (context, props) => props.is_translucent,
-            func: {
+              enable: true,
+              func: {
                 srcRGB: 'src alpha',
                 srcAlpha: 'src alpha',
                 dstRGB: 'one minus src alpha',
                 dstAlpha: 'one minus src alpha'
+              }
             }
-        };
     }
 
     uniforms(regl){

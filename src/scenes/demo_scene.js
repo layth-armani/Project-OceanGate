@@ -71,8 +71,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 360,
-        height: 360,
+        width: 1080,
+        height: 1080,
         as_texture: true
       }
     );
@@ -82,8 +82,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral_Normal,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 360,
-        height: 360,
+        width: 1080,
+        height: 1080,
         as_texture: true
       }
     );

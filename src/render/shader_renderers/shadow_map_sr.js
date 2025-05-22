@@ -36,8 +36,7 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
      */
     render(scene_state){
         const scene = scene_state.scene;
-        const opaqueInputs = [];
-        const transparentInputs = [];
+        const inputs = [];
 
 
         for (const obj of scene.objects) {
@@ -62,18 +61,10 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
                 camera_z
             };
 
-            if (is_translucent) {
-                transparentInputs.push(entry);
-            } else {
-                opaqueInputs.push(entry);
-            }
+            inputs.push(entry)
         }
 
-        this.pipeline(opaqueInputs);
-
-
-        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
-        this.pipeline(transparentInputs);
+        this.pipeline(inputs);
 
     }
 
@@ -84,19 +75,21 @@ export class ShadowMapShaderRenderer extends ShaderRenderer {
     depth(){
         return {
             enable: true,
-            mask: (context, props) => !props.is_translucent,
+            mask: true,
             func: '<='
         };
     }
 
     blend(){
         return {
-            enable: (context, props) => props.is_translucent,
-            func: {
-                srcRGB: 'src alpha', srcAlpha: 'src alpha',
-                dstRGB: 'one minus src alpha', dstAlpha: 'one minus src alpha'
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+              }
             }
-        };
     }
 
     uniforms(regl){

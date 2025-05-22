@@ -25,13 +25,26 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
             frag: this.frag_shader,
             attributes: this.attributes(regl),
             uniforms: this.uniforms(regl),
-            depth: this.depth(),            // uses dynamic mask
-            blend: this.blend(),            // uses dynamic enable
+            depth: this.depth(),           
+            blend: this.blend(),            
             elements: regl.prop('mesh.faces'),
             cull: this.cull()
         });
     }
-    
+
+    attributes(regl) {
+        return {
+            vertex_positions: regl.prop('mesh.vertex_positions'),
+            vertex_normal: regl.prop('mesh.vertex_normals'),
+            vertex_tex_coords: regl.prop('mesh.vertex_tex_coords'),
+            // Use default values if tangent/binormal attributes are missing
+            vertex_tangent: (context, props) => 
+                props.mesh.vertex_tangents || regl.buffer(new Array(props.mesh.vertex_positions.length).fill([1, 0, 0])),
+            vertex_binormal: (context, props) => 
+                props.mesh.vertex_binormals || regl.buffer(new Array(props.mesh.vertex_positions.length).fill([0, 1, 0]))
+        };
+    }
+
     /**
      * Render the objects of the scene_state with its shader
      * @param {*} scene_state 
@@ -43,8 +56,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
 
         scene.lights.forEach(light => {
 
-            const opaqueInputs = [];
-            const transparentInputs = [];
+            const inputs = [];
 
             // Transform light position into camera space
             const light_position_cam = light_to_cam_view(light.position, scene.camera.mat.view);
@@ -56,6 +68,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
                 const {texture, is_textured} = texture_data(obj, this.resource_manager);
                 const is_translucent = obj.material.is_translucent;
                 const apply_normal_map = obj.material.apply_normal_map;
+                
 
                 // default flat normal map if needed
                 let normal_map = this.regl.texture({ width: 1, height: 1, data: [128,128,255,255] });
@@ -91,22 +104,10 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
                     camera_z
                 };
 
-                if (is_translucent) {
-                    transparentInputs.push(entry);
-                } else {
-                    opaqueInputs.push(entry);
-                }
+                inputs.push(entry)
             }
 
-            // 1) draw opaque first (depth-write enabled)
-            this.pipeline(opaqueInputs);
-            // ambient only for first pass
-            ambient_factor = 0;
-
-            // 2) sort transparent back-to-front by camera_z
-            transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
-            // draw transparent (depth-write disabled, blend enabled)
-            this.pipeline(transparentInputs);
+            this.pipeline(inputs);
         });
     }
 
@@ -118,7 +119,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
     depth(){
         return {
             enable: true,
-            mask: (context, props) => !props.is_translucent,
+            mask: true,
             func: '<='
         };
     }
@@ -126,12 +127,14 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
     // dynamic blending: only enable for translucent
     blend(){
         return {
-            enable: (context, props) => props.is_translucent,
-            func: {
-                srcRGB: 'src alpha', srcAlpha: 'src alpha',
-                dstRGB: 'one minus src alpha', dstAlpha: 'one minus src alpha'
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+              }
             }
-        };
     }
 
     uniforms(regl){

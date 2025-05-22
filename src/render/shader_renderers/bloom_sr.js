@@ -24,8 +24,7 @@ export class BloomShaderRenderer extends ShaderRenderer{
 
     render(scene_state, texture){
         const scene = scene_state.scene;
-        const opaqueInputs = [];
-        const transparentInputs = [];
+        const inputs = [];
         const threshold = 0.75;
 
         for(const obj of scene.objects){
@@ -54,31 +53,23 @@ export class BloomShaderRenderer extends ShaderRenderer{
                 camera_z: camera_z
             };
 
-            if (is_translucent) {
-                transparentInputs.push(entry);
-            } else {
-                opaqueInputs.push(entry);
-            }
+            inputs.push(entry)
         }
 
         // Draw opaque objects first
-        this.pipeline(opaqueInputs);
-        
-        // Sort transparent objects back to front and render them
-        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
-        this.pipeline(transparentInputs);
+        this.pipeline(inputs);
     }
 
     blend(){
         return {
-            enable: true,
-            func: {
-                srcRGB: (context, props) => props.is_translucent ? 'src alpha' : 1,
-                srcAlpha: (context, props) => props.is_translucent ? 'src alpha' : 1,
-                dstRGB: (context, props) => props.is_translucent ? 'one minus src alpha' : 1,
-                dstAlpha: (context, props) => props.is_translucent ? 'one minus src alpha' : 1
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+              }
             }
-        };
     }
 
     exclude_object(obj){
@@ -88,7 +79,7 @@ export class BloomShaderRenderer extends ShaderRenderer{
     depth(){
         return {
             enable: true,
-            mask: (context, props) => !props.is_translucent,
+            mask: true,
             func: '<='
         };
     }

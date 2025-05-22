@@ -26,8 +26,8 @@ export class BlurShaderRenderer extends ShaderRenderer{
 
     render(scene_state, texture, horizontal = true){
         const scene = scene_state.scene;
-        const opaqueInputs = [];
-        const transparentInputs = [];
+        const inputs = [];
+        
         const texSize = [scene_state.frame.framebufferWidth, scene_state.frame.framebufferHeight];
 
         for(const obj of scene.objects){
@@ -55,40 +55,31 @@ export class BlurShaderRenderer extends ShaderRenderer{
                 camera_z: camera_z
             };
 
-            if (is_translucent) {
-                transparentInputs.push(entry);
-            } else {
-                opaqueInputs.push(entry);
-            }
+            inputs.push(entry)
         }
 
-        // Draw opaque objects first
-        this.pipeline(opaqueInputs);
+        this.pipeline(inputs);
         
-        // Sort transparent objects back-to-front and render them
-        transparentInputs.sort((a, b) => b.camera_z - a.camera_z);
-        this.pipeline(transparentInputs);
     }
 
     depth(){
         return {
             enable: true,
-            mask: (context, props) => !props.is_translucent,
+            mask: true,
             func: '<='
         };
     }
 
     blend(){
         return {
-            enable: true,
-            func: {
-                // Use alpha blending when is_translucent is true, otherwise use additive blending
-                srcRGB: (context, props) => props.is_translucent ? 'src alpha' : 1,
-                dstRGB: (context, props) => props.is_translucent ? 'one minus src alpha' : 1,
-                srcAlpha: (context, props) => props.is_translucent ? 'src alpha' : 1,
-                dstAlpha: (context, props) => props.is_translucent ? 'one minus src alpha' : 1
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+              }
             }
-        };
     }
 
     uniforms(regl){

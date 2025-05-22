@@ -51,9 +51,6 @@ export class ShaderRenderer {
             vertex_positions:    regl.prop('mesh.vertex_positions'),
             vertex_normal:      regl.prop('mesh.vertex_normals'),
             vertex_tex_coords:  regl.prop('mesh.vertex_tex_coords'),
-            vertex_tangent:  regl.prop('mesh.vertex_tangents'),
-            vertex_binormal:  regl.prop('mesh.vertex_binormals'),
-
         };
     }
 
@@ -78,7 +75,13 @@ export class ShaderRenderer {
      * @returns default blend mode
      */
     blend(){
-        return {enable: false};
+        return {
+            enable: true,
+            func: {
+                src: 'src alpha',  // Use the alpha from the source
+                dst: 'one minus src alpha'  // Blend with background based on inverse alpha
+            }
+        };
     }
 
     /**

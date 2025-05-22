@@ -13,6 +13,7 @@ void main()
 
     // get uv coordinates in the canvas 
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+    if(texture2D(blinn_phong, uv).a < 0.1)discard;
 
     float shadow_factor = texture2D(shadows, uv).x;
     vec3 phong_color = texture2D(blinn_phong, uv).rgb;
@@ -23,7 +24,7 @@ void main()
     if (shadow_factor > 0.0){
         color = shadow_color;
     }
-    if(texture2D(blinn_phong, uv).a < 0.1)discard;
+    
 
 	gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }

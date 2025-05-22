@@ -27,17 +27,17 @@ export class BufferToScreenShaderRenderer extends ShaderRenderer {
             },
             depth: {
                 enable: true,
-                mask: (context, props) => !props.is_translucent,
+                mask: true,
                 func: '<='
             },
             blend: {
-                enable: (context, props) => props.is_translucent,
-                func: {
-                    srcRGB: 'src alpha',
-                    srcAlpha: 'src alpha',
-                    dstRGB: 'one minus src alpha',
-                    dstAlpha: 'one minus src alpha'
-                }
+              enable: true,
+              func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+              }
             },
             vert: this.vert_shader,
             frag: this.frag_shader
@@ -57,8 +57,7 @@ export class BufferToScreenShaderRenderer extends ShaderRenderer {
             is_translucent: false 
         }];
 
-        const opaqueInputs = [];
-        const transparentInputs = [];
+        const inputs = [];
 
         // Process each buffer
         for (const entry of bufferEntries) {
@@ -73,20 +72,9 @@ export class BufferToScreenShaderRenderer extends ShaderRenderer {
                 depth: depth
             };
 
-            if (is_translucent) {
-                transparentInputs.push(renderInput);
-            } else {
-                opaqueInputs.push(renderInput);
-            }
+            inputs.push(entry)
         }
 
-        // Draw opaque buffers first
-        this.pipeline(opaqueInputs);
-        
-        // Sort transparent buffers back-to-front and draw them
-        if (transparentInputs.length > 0) {
-            transparentInputs.sort((a, b) => b.depth - a.depth);
-            this.pipeline(transparentInputs);
-        }
+        this.pipeline(inputs);
     }
 }

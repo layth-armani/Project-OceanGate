@@ -122,6 +122,8 @@ export function cg_mesh_make_plane(){
 export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1], rotation = 0) {
     const vertices = [];
     const normals = [];
+	const tangents = [];
+	const binormals = [];
     const tex_coords = [];
     const faces = [];
     
@@ -148,16 +150,16 @@ export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1
         const sin_r = Math.sin(rotation);
         
         const u_rotated = [
-            u[0] * cos_r + v[0] * sin_r,
-            u[1] * cos_r + v[1] * sin_r,
-            u[2] * cos_r + v[2] * sin_r
-        ];
-        
-        const v_rotated = [
-            -u[0] * sin_r + v[0] * cos_r,
-            -u[1] * sin_r + v[1] * cos_r,
-            -u[2] * sin_r + v[2] * cos_r
-        ];
+			u[0] * cos_r - v[0] * sin_r,  
+			u[1] * cos_r - v[1] * sin_r, 
+			u[2] * cos_r - v[2] * sin_r
+		];
+
+		const v_rotated = [
+			u[0] * sin_r + v[0] * cos_r, 
+			u[1] * sin_r + v[1] * cos_r,
+			u[2] * sin_r + v[2] * cos_r
+		];
         
         u = u_rotated;
         v = v_rotated;
@@ -175,6 +177,8 @@ export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1
             vertices.push([x, y, z]);
             
             normals.push(n);
+			tangents.push([u[0], u[1], u[2]]);
+			binormals.push([v[0], v[1], v[2]]);
             
             tex_coords.push([j / divisions, i / divisions]);
         }
@@ -203,6 +207,8 @@ export function cg_mesh_make_square(size = 1.0, divisions = 1, normal = [0, 0, 1
         vertex_normals: normals,
         faces: faces,
         vertex_tex_coords: tex_coords,
+		vertex_tangents: tangents,
+		vertex_binormals: binormals
     };
 }
 
