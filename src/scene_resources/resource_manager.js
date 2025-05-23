@@ -138,7 +138,8 @@ export class ResourceManager{
             'kloppenheim_07_puresky_blur.jpg',
             'pine.png',
             'fish.png',
-            'night_sky.jpg'
+            'night_sky.jpg',
+            'submarine.png'
           ];
     }
 
@@ -167,6 +168,7 @@ export class ResourceManager{
         "pine.obj",
         "fish.obj",
         "suzanne.obj",
+        "submarine.obj",
       ];
     }
 
