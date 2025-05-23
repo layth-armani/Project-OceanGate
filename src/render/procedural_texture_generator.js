@@ -1,5 +1,4 @@
-
-import { NoiseShaderRenderer } from "./shader_renderers/noise_sr.js";
+import { noise_functions, NoiseShaderRenderer } from "./shader_renderers/noise_sr.js";
 import { BufferToScreenShaderRenderer } from "./shader_renderers/buffer_to_screen_sr.js";
 
 import { vec2 } from "../../lib/gl-matrix_3.3.0/esm/index.js";
@@ -60,7 +59,7 @@ export class ProceduralTextureGenerator {
      * optional additional parameters to parametrize the computation of the noise
      * @returns 
      */
-    compute_texture(name, function_type, {mouse_offset = [0, 0], zoom_factor = 1.0, width = 256, height = 256}){
+    compute_texture(name, function_type, {mouse_offset = [0, 0], zoom_factor = 1.0, width = 256, height = 256, as_texture = false}){
         
         // Create a new buffer in which we will generate the texture
         const buffer = this.new_buffer();
@@ -76,10 +75,36 @@ export class ProceduralTextureGenerator {
             zoom_factor,
             vec2.negate([0, 0], mouse_offset),
         )
-
-        // Convert the buffer to an array of float data that can be queried
         const texture = buffer_to_data_array(this.regl, buffer)
-        this.resource_manager.resources[name] = texture;
+
+        if (function_type == noise_functions.Coral || function_type == noise_functions.Coral_Normal) {
+            const marginX = Math.floor(width * 0.2);
+            const marginY = Math.floor(height * 0.2);
+            
+            const originalData = new Float32Array(texture.data);
+            
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    if (x < marginX || x >= width - marginX || 
+                        y < marginY || y >= height - marginY) {
+                        const idx = (y * width + x) * 4;
+                        texture.data[idx] = 0;
+                        texture.data[idx + 1] = 0;
+                        texture.data[idx + 2] = 0;
+                        texture.data[idx + 3] = function_type == noise_functions.Coral_Normal ? 1.0 : 0.0;
+                    }
+                }
+            }
+        }
+        
+        if (as_texture) this.resource_manager.resources[name] = this.regl.texture({
+            width: width,
+            height: height,
+            data: texture.data, // Float32Array
+            format: 'rgba',
+            type: 'float'
+          });
+        else this.resource_manager.resources[name] = texture;
         return texture;
     }
 

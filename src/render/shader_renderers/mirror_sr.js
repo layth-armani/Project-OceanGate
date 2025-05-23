@@ -93,8 +93,20 @@ export class MirrorShaderRenderer extends ShaderRenderer {
     depth(){
         return {
             enable: true,
-            mask: true,
+            mask: false,
             func: '<=',
+        };
+    }
+    
+    blend(){
+        return {
+            enable: true,
+            func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+            }
         };
     }
 

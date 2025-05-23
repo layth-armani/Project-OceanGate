@@ -132,4 +132,3 @@ export class TerrainShaderRenderer extends ShaderRenderer {
         };
     }
 }
-

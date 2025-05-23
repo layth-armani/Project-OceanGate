@@ -2,13 +2,26 @@ precision highp float;
 
 // Varying values passed from the vertex shader
 varying vec3 v2f_frag_pos;
+varying vec2 v2f_uv;
+
 
 // Global variables specified in "uniforms" entry of the pipeline
 uniform vec3 light_position_cam; // light position in camera coordinates
 uniform samplerCube cube_shadowmap;
 uniform float num_lights;
 
+uniform sampler2D material_texture;
+uniform bool is_textured;
+uniform bool is_translucent;
+uniform vec3 material_base_color;
+
 void main() {
+	if (is_textured && is_translucent) {
+        vec4 texColor = texture2D(material_texture, v2f_uv);
+        if (texColor.a < 0.1) {
+            discard; 
+        }
+    }
 
 	vec3 v = normalize(-v2f_frag_pos);
 	vec3 l = normalize(light_position_cam - v2f_frag_pos);

@@ -109,6 +109,7 @@ export class SceneRenderer {
      * @param {*} scene_state the description of the scene, time, dynamically modified parameters, etc.
      */
     render(scene_state) {
+        let s = performance.now()
         
         const scene = scene_state.scene;
         const frame = scene_state.frame;
@@ -137,17 +138,18 @@ export class SceneRenderer {
             // Render the background
             this.flat_color.render(scene_state);
 
-            // Render the terrain
-            this.terrain.render(scene_state);
-
-            // Render shaded objects
             this.blinn_phong.render(scene_state);
+
+            //this.terrain.render(scene_state);
+
+
+
 
             // Render the reflection of mirror objects on top
             this.mirror.render(scene_state, (s_s) => {
                 this.pre_processing.render(scene_state);
                 this.flat_color.render(s_s);
-                this.terrain.render(scene_state);
+                //this.terrain.render(scene_state);
                 this.blinn_phong.render(s_s);
             });    
         })
@@ -165,6 +167,11 @@ export class SceneRenderer {
 
             // Render the shadows
             this.shadows.render(scene_state);
+            
+        })
+
+        this.render_in_texture("shadows_blurred", () =>{
+            this.big_blur.render(scene_state, this.texture("shadows"), true);
         })
 
         this.render_in_texture("shadows_blurred", () =>{
@@ -176,6 +183,7 @@ export class SceneRenderer {
 
             this.shadow_map.render(scene_state);
         })
+
 
         /*---------------------------------------------------------------
             3. Compositing
@@ -206,6 +214,13 @@ export class SceneRenderer {
 
 
         this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"), scene_state.ui_params.fog_distance);
+        //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+
+        // Visualize cubemap
+        // this.mirror.env_capture.visualize();
+        let e = performance.now()
+        //console.log("Render time: ", e-s);
+
     }
 }
 

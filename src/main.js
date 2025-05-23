@@ -19,6 +19,7 @@ import { ProceduralTextureGenerator } from "./render/procedural_texture_generato
 // Scenes
 import { TutorialScene } from "./scenes/tutorial_scene.js";
 import { DemoScene } from "./scenes/demo_scene.js";
+import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 import { MilestoneScene } from "./scenes/milestone_scene.js";
 import { FOG_DEFAULT_DISTANCE, FOG_MIN_DISTANCE, FOG_MAX_DISTANCE } from "./render/shader_renderers/fog_mixer_sr.js";
 // import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
@@ -38,6 +39,10 @@ async function main() {
       'OES_texture_float', 'OES_texture_float_linear', 'WEBGL_color_buffer_float',
       'OES_vertex_array_object', 'OES_element_index_uint', 'WEBGL_depth_texture'
     ],
+    attributes: {
+      premultipliedAlpha: true,
+      alpha: true
+    }
   })
 
   // The <canvas> object (HTML element for drawing graphics) was created by REGL: we take a handle to it
@@ -86,7 +91,6 @@ async function main() {
     create_hotkey_action("Pause", "p", () => {
       ui_global_params.is_paused = !ui_global_params.is_paused;
     });
-
   }
 
   /*---------------------------------------------------------------
@@ -153,7 +157,7 @@ async function main() {
   const tutorial_scene = new TutorialScene(resource_manager);
   const milestone_scene = new MilestoneScene(resource_manager,procedural_texture_generator);
 
-  const active_scene = milestone_scene;   // Assign the scene to be rendered to active_scene
+  const active_scene = demo_scene;   // Assign the scene to be rendered to active_scene
   
   /*---------------------------------------------------------------
     5. UI Instantiation
@@ -162,6 +166,7 @@ async function main() {
   clear_overlay();
   initialize_ui_params();  // add general UI controls
   active_scene.initialize_ui_params();  // add scene-specific UI controls
+
 
   /*---------------------------------------------------------------
     6. Rendering Loop
@@ -199,6 +204,7 @@ async function main() {
     // Compute the time elapsed since last frame
     dt = frame.time - prev_regl_time;
     prev_regl_time = frame.time;
+
 
     // If the time is not paused, iterate over all actors and call their evolve function
     if (!ui_global_params.is_paused){

@@ -1,4 +1,3 @@
-
 const default_texture = null; 
 const default_base_color = [1.0, 0.0, 1.0];  // magenta, used when no texture is provided
 const default_shininess = 0.1;
@@ -23,6 +22,8 @@ class Material {
         this.texture = default_texture;
         this.color = default_base_color;
         this.shininess = default_shininess;
+        this.is_translucent = false;
+        this.apply_normal_map = false;
         this.properties = [];
     }
 
@@ -43,12 +44,18 @@ class DiffuseMaterial extends Material {
     constructor({
         texture = null, 
         color = default_base_color, 
-        shininess = default_shininess
+        shininess = default_shininess,
+        is_translucent = false,
+        apply_normal_map = false,
+        normal_map = null,
     }){
         super()
         this.texture = texture;
         this.color = color;
         this.shininess = shininess;
+        this.is_translucent = is_translucent;
+        this.apply_normal_map = apply_normal_map;
+        this.normal_map = normal_map;
     }
 }
 
@@ -79,8 +86,10 @@ class TerrainMaterial extends Material {
         this.properties.push("terrain");
         this.properties.push("no_blinn_phong");
         this.properties.push("no_bloom");
+        this.properties.push("no_bloom");
     }
 }
+
 
 /*---------------------------------------------------------------
 	Material Instantiation
@@ -101,14 +110,14 @@ export const gray = new DiffuseMaterial({
     shininess: 0.5
 });
 
+export const ochre = new DiffuseMaterial({
+    color:[0.95, 0.85, 0.5],
+    shininess: 0.8
+});
+
 export const gold = new DiffuseMaterial({
     texture: 'tex_gold',
     shininess: 14.0
-});
-
-export const pine = new DiffuseMaterial({
-    texture: 'pine.png',
-    shininess: 0.5
 });
 
 export const terrain = new TerrainMaterial({
@@ -121,3 +130,19 @@ export const fish = new DiffuseMaterial({
     texture: 'fish.png'
 });
 
+
+export const pine = new DiffuseMaterial({
+    texture: 'pine.png',
+    shininess: 0.5
+});
+
+
+export function diffuse(texture = default_texture, is_translucent = false, apply_normal_map = false, normal_map = null) {
+    return new DiffuseMaterial({
+        texture: texture,
+        is_translucent: is_translucent,
+        apply_normal_map: apply_normal_map,
+        normal_map: normal_map,
+        properties: ['no_bloom']
+    });
+}
