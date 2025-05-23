@@ -339,7 +339,7 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
       actors[`coral_${objects.length}`] = coral;
     });
   });
-  //console.log("Corals placed:", coral_count);
+  console.log("Corals placed:", coral_count);
 }
 
 
