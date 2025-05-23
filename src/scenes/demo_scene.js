@@ -291,80 +291,58 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
   let coral_count = 0;
   
   const light_positions = Object.entries(actors)
-    .filter(([name, actor]) => name.startsWith("light_"))
+    .filter(([name]) => name.startsWith("light_"))
     .map(([, light]) => light.position);
-  const mean_light = light_positions.reduce(
-    (acc, pos) => [acc[0] + pos[0], acc[1] + pos[1], acc[2] + pos[2]],
-    [0, 0, 0]
-  ).map(c => c / light_positions.length);
+  const mean_light = light_positions
+    .reduce((acc, pos) => [acc[0]+pos[0], acc[1]+pos[1], acc[2]+pos[2]], [0,0,0])
+    .map(c => c / light_positions.length);
 
   terrain_mesh.vertex_positions.forEach((vertex, index) => {
     const position = vertex;
-    const normal = terrain_mesh.vertex_normals[index];
-    const result = decide(index);
+    const normal   = terrain_mesh.vertex_normals[index];
+    if (decide(index) !== 0) return;
+    if (position[2] <= -1 || position[2] >= 1) return;
+    if (vec3.angle(up_vector, normal) >= Math.PI/6) return;
+    if (Math.abs(position[0]) >= 0.5 || Math.abs(position[1]) >= 0.5) return;
+    
+    coral_count++;
+    const mesh_opts = ['mesh_vertical_square_x', 'mesh_vertical_square_y'];
+    const min_size = 1.0, max_size = 2.0;
+    const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
+    const base_trans = vec3.add(
+      [0,0,0],
+      vec3.mul([0,0,0], TERRAIN_SCALE, position),
+      [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 0.1]
+    );
 
-    if (result === 0 &&
-        position[2] > -1 && position[2] < 1 &&
-        vec3.angle(up_vector, normal) < Math.PI/6 &&
-        Math.abs(position[0]) < 0.5 &&
-        Math.abs(position[1]) < 0.5) {
-      
-      coral_count++;
-      const mesh_options = ['mesh_vertical_square_x', 'mesh_vertical_square_y'];
-      const min_size = 1.0, max_size = 2.0;
-      const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
-      
-      const coral_translation = vec3.add(
-        [0,0,0],
-        vec3.mul([0,0,0], TERRAIN_SCALE, position),
-        [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 0.1]
-      );
+    mesh_opts.forEach(mesh_reference => {
+      const normal_axis = mesh_reference.endsWith('_x')
+        ? [1,0,0]
+        : [0,1,0];
 
-      mesh_options.forEach(mesh_reference => {
-        const coral = {
-          translation: [...coral_translation],
-          scale: [scale_val, scale_val, scale_val],
-          mesh_reference: mesh_reference,
-          material: MATERIALS.diffuse('coral', true, true, 'coral_normal')
-        };
-        coral.evolve = (dt) => {
-          const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
-          coral.scale = [scale_val + pulse, scale_val + pulse, scale_val + pulse];
-        };
+      const to_light = vec3.sub([0,0,0], mean_light, base_trans);
+      vec3.normalize(to_light, to_light);
+      const dp = vec3.dot(normal_axis, to_light);
+      const angle = dp < 0 ? Math.PI : 0; 
 
-        let normal_axis;
-        let scale_axis_index;
-        if (mesh_reference.endsWith('_x')) {
-          normal_axis = [1, 0, 0];
-          scale_axis_index = 0;
-        } else if (mesh_reference.endsWith('_y')) {
-          normal_axis = [0, 1, 0];
-          scale_axis_index = 1;
-        } else {
-          normal_axis = [0, 0, 1];
-          scale_axis_index = 2;
-        }
+      const coral = {
+        translation: [...base_trans],
+        scale:       [scale_val, scale_val, scale_val],
+        mesh_reference,
+        material:    MATERIALS.diffuse('coral', true, true, 'coral_normal'),
+        rotation:    { axis: normal_axis, angle }
+      };
+      coral.evolve = (dt) => {
+        const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
+        coral.scale = [scale_val + pulse, scale_val + pulse, scale_val + pulse];
+      };
 
-        const to_light = vec3.sub([0,0,0], mean_light, coral_translation);
-        vec3.normalize(to_light, to_light);
-        const dp = vec3.dot(normal_axis, to_light);
-
-        
-      if (dp < 0) {
-        coral.scale[scale_axis_index] *= -1;
-        coral.flip = -1.0;    
-      }  else {
-        coral.flip = +1.0;    
-      }
-
-      
-        objects.push(coral);
-        const coral_name = `coral_${objects.length}`;
-        actors[coral_name] = coral;
-      });
-    }
+      objects.push(coral);
+      actors[`coral_${objects.length}`] = coral;
+    });
   });
   //console.log("Corals placed:", coral_count);
 }
+
 
 
