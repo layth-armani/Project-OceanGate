@@ -12,6 +12,7 @@ import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { BloomShaderRenderer } from "./shader_renderers/bloom_sr.js"
 import { BlurShaderRenderer } from "./shader_renderers/gaussian_blur_sr.js"
 import { BloomMixerShaderRenderer } from "./shader_renderers/bloom_mixer_sr.js"
+import { BigBlurShaderRenderer } from "./shader_renderers/big_gaussian_blur_sr.js"
 
 export class SceneRenderer {
 
@@ -42,10 +43,12 @@ export class SceneRenderer {
         
         this.bloom = new BloomShaderRenderer(regl,resource_manager);
         this.blur = new BlurShaderRenderer(regl,resource_manager);
+        this.big_blur = new BigBlurShaderRenderer(regl,resource_manager);
         this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
 
         // Create textures & buffer to save some intermediate renders into a texture
-        this.create_texture_and_buffer("shadows", {}); 
+        this.create_texture_and_buffer("shadows", {});
+        this.create_texture_and_buffer("shadows_blurred", {});
         this.create_texture_and_buffer("base", {});
         this.create_texture_and_buffer("with_shadows", {});
         this.create_texture_and_buffer("bloom", {});  
@@ -159,8 +162,14 @@ export class SceneRenderer {
             // Prepare the z_buffer and object with default black color
             this.pre_processing.render(scene_state);
 
+
             // Render the shadows
             this.shadows.render(scene_state);
+        })
+
+        this.render_in_texture("shadows_blurred", () =>{
+            
+            this.big_blur.render(scene_state, this.texture("shadows"), true);
         })
 
         this.render_in_texture("distances", () =>{
@@ -174,7 +183,7 @@ export class SceneRenderer {
 
         // Mix the base color of the scene with the shadows information to create the final result
         this.render_in_texture("with_shadows", () => {
-            this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+            this.map_mixer.render(scene_state, this.texture("shadows_blurred"), this.texture("base"));
         });
 
         this.render_in_texture("bloom", () => {

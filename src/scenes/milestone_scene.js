@@ -28,7 +28,7 @@ export class MilestoneScene extends Scene {
 
     const boundary = new BoundedBox(
       vec3.fromValues(10, 10, 10),
-      vec3.fromValues(-10, -10, -0.509727)
+      vec3.fromValues(-10, -10, 1)
     )
 
     this.camera.set_boundary(boundary);
@@ -46,13 +46,13 @@ export class MilestoneScene extends Scene {
   initialize_scene(){
 
     this.lights.push({
-      position : [-4,-5,37],
-      color: [0.75, 0.75, 0.75]
+      position : [5,5,27],
+      color: [0.4, 0.4, 0.4]
     });
 
     this.lights.push({
-      position : [-4,-5,37],
-      color: [0.1, 0.1, 0.1]
+      position : [0,0,27],
+      color: [0.4, 0.4, 0.4]
     });
 
     const height_map = this.procedural_texture_generator.compute_texture(
@@ -68,9 +68,9 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      200, 
+      300, 
       this.camera.get_boundary(),
-      {max_vel: 2, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 10}
+      {max_vel: 3, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 100}
     );
 
     this.static_objects.push({
@@ -84,7 +84,7 @@ export class MilestoneScene extends Scene {
       translation: [0, 0, -1],
       scale: this.TERRAIN_SCALE,
       mesh_reference: 'mesh_terrain',
-      material: MATERIALS.terrain
+      material: MATERIALS.terrain,
     });
 
 

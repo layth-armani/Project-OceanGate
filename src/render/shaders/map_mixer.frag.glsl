@@ -9,7 +9,7 @@ uniform sampler2D blinn_phong;
 
 void main()
 {
-    float shadows_strength = 0.4;
+    float shadows_strength = 0.1;
 
     // get uv coordinates in the canvas 
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
