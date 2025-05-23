@@ -1,6 +1,6 @@
 import { POVCamera } from "../scene_resources/camera.js"
 import * as MATERIALS from "../render/materials.js"
-import { cg_mesh_make_uv_sphere } from "../cg_libraries/cg_mesh.js"
+import { cg_mesh_make_uv_sphere, cg_mesh_make_square } from "../cg_libraries/cg_mesh.js"
 import { terrain_build_mesh } from "../scene_resources/dendry_terrain_generation.js"
 import { noise_functions } from "../render/shader_renderers/noise_sr.js"
 import { Scene } from "./scene.js"
@@ -114,6 +114,9 @@ export class MilestoneScene extends Scene {
     const terrain_mesh = terrain_build_mesh(height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square_x", cg_mesh_make_square(1.0, 1, [1, 0, 0], Math.PI/4));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square_y", cg_mesh_make_square(1.0, 1, [0, 1, 0], Math.PI/4));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square_z", cg_mesh_make_square(1.0, 1, [0, 0, 1], Math.PI/4));
 
     this.create_random_fish(
       this.static_objects, 
@@ -140,7 +143,8 @@ export class MilestoneScene extends Scene {
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
 
 
-    this.objects = this.static_objects;
+    this.objects = this.static_objects.concat(this.dynamic_objects);
+
 
     
 
@@ -229,6 +233,12 @@ export class MilestoneScene extends Scene {
         const new_translation = vec3.create();
         vec3.add(new_translation, boid.translation, vec3.scale(vec3.create(), boid.velocity, dt));
         boid.translation = new_translation
+      }
+    }
+    for (const name in this.actors) {
+      if (name.includes("coral")){
+        const coral = this.actors[name];
+        coral.evolve;
       }
     }
   }
@@ -366,16 +376,25 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
     if (decide(index) !== 0) return;
     if (position[2] <= -1 || position[2] >= 1) return;
     if (vec3.angle(up_vector, normal) >= Math.PI/6) return;
-    if (Math.abs(position[0]) >= 0.5 || Math.abs(position[1]) >= 0.5) return;
+    
+ 
+    const center_distance = Math.sqrt(position[0]*position[0] + position[1]*position[1]);
+    if (center_distance < 0.3) return;
+    
+    
+    if (Math.abs(position[0]) < 0.4 && Math.abs(position[1]) < 0.4) return;
+    
+  
+    if (Math.abs(position[0]) >= 0.9 || Math.abs(position[1]) >= 0.9) return;
     
     coral_count++;
     const mesh_opts = ['mesh_vertical_square_x', 'mesh_vertical_square_y'];
-    const min_size = 1.0, max_size = 2.0;
+    const min_size = 2.0, max_size = 5.0;  // Slightly reduced the size
     const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
     const base_trans = vec3.add(
       [0,0,0],
       vec3.mul([0,0,0], TERRAIN_SCALE, position),
-      [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 0.1]
+      [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 1.0]
     );
 
     mesh_opts.forEach(mesh_reference => {
@@ -404,5 +423,5 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
       actors[`coral_${objects.length}`] = coral;
     });
   });
-  //console.log("Corals placed:", coral_count);
+  console.log("Corals placed:", coral_count);
 }
