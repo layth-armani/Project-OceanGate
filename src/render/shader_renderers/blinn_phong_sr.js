@@ -101,7 +101,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
                     material_shininess: obj.material.shininess,
                     apply_normal_map,
                     normal_map,
-                    camera_z
+                    camera_z,
                 };
 
                 inputs.push(entry)
@@ -151,7 +151,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
             is_translucent: regl.prop('is_translucent'),
             material_shininess: regl.prop('material_shininess'),
             apply_normal_map: regl.prop('apply_normal_map'),
-            normal_map: regl.prop('normal_map')
+            normal_map: regl.prop('normal_map'),
         };
     }
 

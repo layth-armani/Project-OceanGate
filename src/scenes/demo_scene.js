@@ -36,12 +36,16 @@ export class DemoScene extends Scene {
 
     // Add lights
     this.lights.push({
-      position : [0,0,2.5],  // Adjusted from [0,0,25]
+      position : [0,-2.5,4.5], 
+      color: [0.75, 0.75, 0.75]
+    });
+    this.lights.push({
+      position : [0,2.5,4.5],  
       color: [0.75, 0.75, 0.75]
     });
     
-    const width = 100;
-    const height = 100;
+    const width = 500;
+    const height = 500;
     const terrain_translation = [0, 0, -2];  // Adjusted from [0, 0, -20]
 
     this.procedural_texture_generator.compute_texture(
@@ -71,8 +75,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 1080,
-        height: 1080,
+        width: 180,
+        height: 180,
         as_texture: true
       }
     );
@@ -82,8 +86,8 @@ export class DemoScene extends Scene {
       noise_functions.Coral_Normal,
       {mouse_offset: [-12.24, 8.15],
         zoom_factor: 1.,
-        width: 1080,
-        height: 1080,
+        width: 180,
+        height: 180,
         as_texture: true
       }
     );
@@ -266,7 +270,7 @@ export class DemoScene extends Scene {
  * @returns 
  */
 function decide(index){
-  const chance = 100; // the higher this value, the less likely it is to place an object
+  const chance = 1000; // the higher this value, the less likely it is to place an object
   const idx = (pseudo_random_int(index))%chance;
   return idx
 }
@@ -285,57 +289,82 @@ function pseudo_random_int(index) {
 function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terrain_translation){
   const up_vector = [0,0,1];
   let coral_count = 0;
-  const coral_translation = [terrain_translation[0], terrain_translation[1],terrain_translation[2]]
+  
+  const light_positions = Object.entries(actors)
+    .filter(([name, actor]) => name.startsWith("light_"))
+    .map(([, light]) => light.position);
+  const mean_light = light_positions.reduce(
+    (acc, pos) => [acc[0] + pos[0], acc[1] + pos[1], acc[2] + pos[2]],
+    [0, 0, 0]
+  ).map(c => c / light_positions.length);
 
   terrain_mesh.vertex_positions.forEach((vertex, index) => {
     const position = vertex;
     const normal = terrain_mesh.vertex_normals[index];
-
     const result = decide(index);
 
-    if (result == 0){
-      if (
-        position[2] > -1 && position[2] < 1 && 
-        vec3.angle(up_vector, normal) < Math.PI/6 && 
-        position[0] > -0.5 && position[0] < 0.5 &&
-        position[1] > -0.5 && position[1] < 0.5
-      ) {
-        coral_count++;
-        const mesh_options = [
-          'mesh_vertical_square_x',
-          'mesh_vertical_square_y'
-        ];
-
-        const min_size = 1.0, max_size = 2.0; 
-        const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
-        const coral_translation = vec3.add([0,0,0],
-          vec3.mul([0,0,0], TERRAIN_SCALE, position),
-          [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 0.1]  
+    if (result === 0 &&
+        position[2] > -1 && position[2] < 1 &&
+        vec3.angle(up_vector, normal) < Math.PI/6 &&
+        Math.abs(position[0]) < 0.5 &&
+        Math.abs(position[1]) < 0.5) {
+      
+      coral_count++;
+      const mesh_options = ['mesh_vertical_square_x', 'mesh_vertical_square_y'];
+      const min_size = 1.0, max_size = 2.0;
+      const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
+      
+      const coral_translation = vec3.add(
+        [0,0,0],
+        vec3.mul([0,0,0], TERRAIN_SCALE, position),
+        [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 0.1]
       );
 
-        const coral_panes = mesh_options.map((mesh_reference, i) => {
-          const coral = {
-            translation: [...coral_translation],
-            scale: [scale_val, scale_val, scale_val],
-            mesh_reference: mesh_reference,
-            material:  MATERIALS.diffuse('coral', true, true, 'coral_normal')
-          };
-          coral.evolve = (dt) => {
-            const base = scale_val;
-            const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
-            coral.scale = [base + pulse, base + pulse, base + pulse];
-          };
-          return coral;
-        });
+      mesh_options.forEach(mesh_reference => {
+        const coral = {
+          translation: [...coral_translation],
+          scale: [scale_val, scale_val, scale_val],
+          mesh_reference: mesh_reference,
+          material: MATERIALS.diffuse('coral', true, true, 'coral_normal')
+        };
+        coral.evolve = (dt) => {
+          const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
+          coral.scale = [scale_val + pulse, scale_val + pulse, scale_val + pulse];
+        };
 
-        coral_panes.forEach((coral, i) => {
-          objects.push(coral);
-          const coral_name = `coral_${objects.length}`;
-          actors[coral_name] = coral;
-        });
+        let normal_axis;
+        let scale_axis_index;
+        if (mesh_reference.endsWith('_x')) {
+          normal_axis = [1, 0, 0];
+          scale_axis_index = 0;
+        } else if (mesh_reference.endsWith('_y')) {
+          normal_axis = [0, 1, 0];
+          scale_axis_index = 1;
+        } else {
+          normal_axis = [0, 0, 1];
+          scale_axis_index = 2;
+        }
+
+        const to_light = vec3.sub([0,0,0], mean_light, coral_translation);
+        vec3.normalize(to_light, to_light);
+        const dp = vec3.dot(normal_axis, to_light);
+
+        
+      if (dp < 0) {
+        coral.scale[scale_axis_index] *= -1;
+        coral.flip = -1.0;    
+      }  else {
+        coral.flip = +1.0;    
       }
+
+      
+        objects.push(coral);
+        const coral_name = `coral_${objects.length}`;
+        actors[coral_name] = coral;
+      });
     }
   });
   //console.log("Corals placed:", coral_count);
 }
+
 

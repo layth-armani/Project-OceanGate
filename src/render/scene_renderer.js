@@ -199,8 +199,8 @@ export class SceneRenderer {
         //this.blur.render(scene_state, this.texture("blurred_bloom"), true);
 
 
-        this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"))
-        //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+        //this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"))
+        this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
 
         // Visualize cubemap
         // this.mirror.env_capture.visualize();

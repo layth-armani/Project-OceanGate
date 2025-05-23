@@ -29,13 +29,9 @@ void main() {
     vec3 normal_vs = normalize(mat_normals_model_view * vertex_normal);
     v2f_normal = normal_vs;
     
-    flip = 0.;
     if (apply_normal_map) {
         v2f_tangent = normalize( mat_normals_model_view * vertex_tangent);
         v2f_binormal = normalize(mat_normals_model_view * vertex_binormal);
-        float cosAngle = clamp(dot(normal_vs, vec3(0., 0., -1.)), -1.0, 1.0);
-        flip = acos(cosAngle);
-        
     }
 
     gl_Position = mat_model_view_projection * position_v4;
