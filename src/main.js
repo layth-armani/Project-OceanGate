@@ -22,6 +22,7 @@ import { DemoScene } from "./scenes/demo_scene.js";
 import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 import { MilestoneScene } from "./scenes/milestone_scene.js";
 import { FOG_DEFAULT_DISTANCE, FOG_MIN_DISTANCE, FOG_MAX_DISTANCE } from "./render/shader_renderers/fog_mixer_sr.js";
+import { DEFAULT_BLOOM_THRESHOLD, MAX_BLOOM_THRESHOLD } from "./render/shader_renderers/bloom_sr.js";
 // import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 
 DOM_loaded_promise.then(main)
@@ -67,6 +68,7 @@ async function main() {
    * Define here your parameters.
    */
   const ui_global_params = {
+    bloom_threshold: DEFAULT_BLOOM_THRESHOLD,
     fog_distance: FOG_DEFAULT_DISTANCE,
     is_paused: false,
   }
@@ -80,6 +82,15 @@ async function main() {
       [0, n_steps_slider],
       (i) => {
         ui_global_params.fog_distance = FOG_MIN_DISTANCE + (i / n_steps_slider) * (FOG_MAX_DISTANCE - FOG_MIN_DISTANCE);
+      },
+      1
+    )
+
+    create_slider(
+      "bloom threshold",
+      [0, n_steps_slider],
+      (i) => {
+        ui_global_params.bloom_threshold = (i / n_steps_slider) * MAX_BLOOM_THRESHOLD;
       },
       1
     )

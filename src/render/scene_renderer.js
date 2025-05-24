@@ -12,7 +12,7 @@ import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { BloomShaderRenderer } from "./shader_renderers/bloom_sr.js"
 import { BlurShaderRenderer } from "./shader_renderers/gaussian_blur_sr.js"
 import { BloomMixerShaderRenderer } from "./shader_renderers/bloom_mixer_sr.js"
-    
+
 
 export class SceneRenderer {
 
@@ -191,7 +191,7 @@ export class SceneRenderer {
         });
 
         this.render_in_texture("bloom", () => {
-            this.bloom.render(scene_state, this.texture("with_shadows"));
+            this.bloom.render(scene_state, this.texture("with_shadows"),scene_state.ui_params.bloom_threshold);
         })
         
         this.render_in_texture("blurred_bloom", () => {

@@ -1,5 +1,8 @@
 import { ShaderRenderer } from "./shader_renderer.js";
 
+export const DEFAULT_BLOOM_THRESHOLD = 0.75;
+export const MAX_BLOOM_THRESHOLD = 1;
+
 export class BloomShaderRenderer extends ShaderRenderer{
     constructor(regl, resource_manager){
         super(
@@ -22,10 +25,9 @@ export class BloomShaderRenderer extends ShaderRenderer{
         });
     }
 
-    render(scene_state, texture){
+    render(scene_state, texture, threshold){
         const scene = scene_state.scene;
         const inputs = [];
-        const threshold = 0.75;
 
         for(const obj of scene.objects){
             if(this.exclude_object(obj)) continue;
