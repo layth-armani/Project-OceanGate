@@ -139,7 +139,8 @@ export class ResourceManager{
             'pine.png',
             'fish.png',
             'night_sky.jpg',
-            'submarine.png'
+            'submarine.png',
+            'seagrass.png'
           ];
     }
 
