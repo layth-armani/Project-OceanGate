@@ -9,6 +9,7 @@ import { create_button, create_slider, create_hotkey_action } from "../cg_librar
 import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { ProceduralTextureGenerator } from "../render/procedural_texture_generator.js"
 import { BoundedBox } from "../scene_resources/bounded_box.js"
+import { BezierCamAnimation } from "../scene_resources/bezier_cam_animation.js";
 
 export class MilestoneScene extends Scene {
 
@@ -27,8 +28,8 @@ export class MilestoneScene extends Scene {
     this.dynamic_objects = [];
 
     const boundary = new BoundedBox(
-      vec3.fromValues(10, 10, 10),
-      vec3.fromValues(-10, -10, 1)
+      vec3.fromValues(35, 35, 10),
+      vec3.fromValues(-35, -35, 0)
     )
 
     this.camera.set_boundary(boundary);
@@ -110,7 +111,7 @@ export class MilestoneScene extends Scene {
       { width: 200, height: 200, mouse_offset: [-12.24, 8.15] }
     );
     this.WATER_LEVEL = 0.0;
-    this.TERRAIN_SCALE = [70,70, 10 ];
+    this.TERRAIN_SCALE = [70,70, 10];
     const terrain_mesh = terrain_build_mesh(height_map, dendry_height_map);
     this.resource_manager.add_procedural_mesh("mesh_terrain", terrain_mesh);
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
