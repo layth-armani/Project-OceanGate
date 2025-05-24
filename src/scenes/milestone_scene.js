@@ -28,7 +28,7 @@ export class MilestoneScene extends Scene {
     this.dynamic_objects = [];
 
     const boundary = new BoundedBox(
-      vec3.fromValues(35, 35, 10),
+      vec3.fromValues(35, 35,10),
       vec3.fromValues(-35, -35, 0)
     )
 
@@ -48,12 +48,12 @@ export class MilestoneScene extends Scene {
 
     this.lights.push({
       position : [5,5,7],
-      color: [0.4, 0.4, 0.4]
+      color: [0.9, 0.9, 0.9]
     });
 
     this.lights.push({
       position : [0,0,7],
-      color: [0.4, 0.4, 0.4]
+      color: [0.9, 0.9, 0.9]
     });
 
     this.procedural_texture_generator.compute_texture(
@@ -74,6 +74,17 @@ export class MilestoneScene extends Scene {
         zoom_factor: 1.,
         width: 1080,
         height: 1080,
+        as_texture: true
+      }
+    );
+
+    this.procedural_texture_generator.compute_texture(
+      "rock", 
+      noise_functions.Rock,
+      {mouse_offset: [-12.24, 8.15],
+        zoom_factor: 1.,
+        width: 360,
+        height: 360,
         as_texture: true
       }
     );
@@ -121,25 +132,20 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      300, 
+      100, 
       this.camera.get_boundary(),
-      {max_vel: 3, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 100}
+      {max_vel: 3, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 10}
     );
-
+    
     this.static_objects.push({
       translation: [0, 0, 0],
       scale: [80., 80., 80.],
       mesh_reference: 'mesh_sphere_env_map',
       material: MATERIALS.diffuse('deep_sea')
     });
-
-    this.static_objects.push({
-      translation: [0, 0, -1],
-      scale: [4., 4., 4.],
-      mesh_reference: 'rock.obj',
-      material: MATERIALS.gray
-    });
-
+    
+    
+    
     const terrain_translation = [0, 0, -10];
     this.static_objects.push({
           translation: terrain_translation,
@@ -149,8 +155,9 @@ export class MilestoneScene extends Scene {
     });
 
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
-
-
+    place_random_rocks(this.static_objects,terrain_mesh, this.TERRAIN_SCALE,terrain_translation, 100);
+    
+    
     this.objects = this.static_objects.concat(this.dynamic_objects);
 
 
@@ -345,13 +352,59 @@ export class MilestoneScene extends Scene {
 }
 
 
+
+function place_random_rocks(objects, terrain_mesh, TERRAIN_SCALE, terrain_translation, n_rocks) {
+  const up_vector = [0, 0, 1];
+  let rock_count = 0;
+
+  // Shuffle indices for random placement
+  const indices = Array.from({length: terrain_mesh.vertex_positions.length}, (_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  for (let k = 0; k < indices.length && rock_count < n_rocks; k++) {
+    const index = indices[k];
+    const position = terrain_mesh.vertex_positions[index];
+    const normal = terrain_mesh.vertex_normals[index];
+
+    // Placement filters: only slope and height
+    if (position[2] <= -1 || position[2] >= 1) continue;
+    if (vec3.angle(up_vector, normal) >= Math.PI / 6) continue;
+
+    // World position
+    const world_pos = vec3.add(
+      [0, 0, 0],
+      vec3.mul([0, 0, 0], TERRAIN_SCALE, position),
+      [terrain_translation[0], terrain_translation[1], terrain_translation[2] ]
+    );
+
+    // Random scale for variety
+    const min_scale = 0.3, max_scale = 0.7;
+    const scale_val = min_scale + (max_scale - min_scale) * Math.random();
+
+    const rock = {
+      translation: [...world_pos],
+      scale: [scale_val, scale_val, scale_val],
+      mesh_reference: "rock.obj",
+      material: MATERIALS.diffuse("rock"),
+    };
+
+    objects.push(rock);
+    rock_count++;
+  }
+}
+
+
+
 /**
  * Given a vertex, decide wether to place something on it or not
  * @param {*} index of the vertex 
  * @returns 
  */
 function decide(index){
-  const chance = 1000; // the higher this value, the less likely it is to place an object
+  const chance = 200; // the higher this value, the less likely it is to place an object
   const idx = (pseudo_random_int(index))%chance;
   return idx
 }
@@ -384,20 +437,10 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
     if (decide(index) !== 0) return;
     if (position[2] <= -1 || position[2] >= 1) return;
     if (vec3.angle(up_vector, normal) >= Math.PI/6) return;
-    
- 
-    const center_distance = Math.sqrt(position[0]*position[0] + position[1]*position[1]);
-    if (center_distance < 0.3) return;
-    
-    
-    if (Math.abs(position[0]) < 0.4 && Math.abs(position[1]) < 0.4) return;
-    
-  
-    if (Math.abs(position[0]) >= 0.9 || Math.abs(position[1]) >= 0.9) return;
-    
+
     coral_count++;
     const mesh_opts = ['mesh_vertical_square_x', 'mesh_vertical_square_y'];
-    const min_size = 2.0, max_size = 5.0;  // Slightly reduced the size
+    const min_size = 2.0, max_size = 5.0;
     const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
     const base_trans = vec3.add(
       [0,0,0],

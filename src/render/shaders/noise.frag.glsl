@@ -377,6 +377,35 @@ vec3 tex_deep_sea(vec2 point) {
     return clamp(color, 0.0, 1.0);
 }
 
+vec3 tex_rock(vec2 point) {
+    // Base rock color
+    vec3 base_color = vec3(0.38, 0.36, 0.32);
+
+    // Layered noise for roughness and color variation
+    float n1 = perlin_fbm(point * 8.0) * 0.5 + 0.5;
+    float n2 = perlin_fbm(point * 16.0) * 0.5 + 0.5;
+    float n3 = turbulence(point * 10.0) * 0.2;
+
+    // Less directional veins: use a circular pattern and noise
+    float angle = atan(point.y, point.x);
+    float radius = length(point);
+    float veins = smoothstep(0.45, 0.55, sin(radius * 10.0 + angle * 4.0 + n2 * 6.0)) * 0.10;
+    veins += smoothstep(0.48, 0.52, perlin_noise(point * 20.0 + n1 * 5.0)) * 0.08;
+
+    // Softer speckles
+    float speckle = fract(sin(dot(point * 18.0, vec2(12.9898, 78.233))) * 43758.5453);
+    speckle = smoothstep(0.85, 1.0, speckle);
+    vec3 speckle_color = vec3(0.7, 0.7, 0.6) * speckle * 0.3;
+
+    // Blend everything together for a more faded, less pixelated look
+    vec3 color = base_color * (0.8 + 0.3 * n1 - 0.1 * n2) + n3 - veins + speckle_color;
+
+    // Add a gentle fade for more depth
+    color = mix(color, base_color, 0.2 * n2);
+
+    return clamp(color, 0.0, 1.0);
+}
+
 // ==============================================================
 // Dendry Noise
 

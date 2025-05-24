@@ -16,7 +16,8 @@ export const noise_functions = {
     DeepSea: "tex_deep_sea",
     Coral: "tex_coral",
     Coral_Normal: "tex_coral_normal",
-    FBM_for_terrain: "tex_fbm_for_terrain"
+    FBM_for_terrain: "tex_fbm_for_terrain",
+    Rock:"tex_rock"
 };
 
 
