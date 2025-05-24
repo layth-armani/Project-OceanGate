@@ -178,6 +178,7 @@ export class SceneRenderer {
         this.render_in_texture("distances", () =>{
 
             this.shadow_map.render(scene_state);
+
         })
 
 
@@ -203,6 +204,7 @@ export class SceneRenderer {
         })
 
 
+        //this.shadows.render(scene_state);
 
         //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
         //this.bloom.render(scene_state, this.texture("with_shadows"));

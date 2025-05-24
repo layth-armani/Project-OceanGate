@@ -29,7 +29,7 @@ export class MilestoneScene extends Scene {
 
     const boundary = new BoundedBox(
       vec3.fromValues(35, 35,10),
-      vec3.fromValues(-35, -35, 0)
+      vec3.fromValues(-35, -35, -3)
     )
 
     this.camera.set_boundary(boundary);
@@ -128,6 +128,8 @@ export class MilestoneScene extends Scene {
     this.resource_manager.add_procedural_mesh("mesh_sphere_env_map", cg_mesh_make_uv_sphere(16));
     this.resource_manager.add_procedural_mesh("mesh_vertical_square_x", cg_mesh_make_square(1.0, 1, [1, 0, 0], Math.PI/4));
     this.resource_manager.add_procedural_mesh("mesh_vertical_square_y", cg_mesh_make_square(1.0, 1, [0, 1, 0], Math.PI/4));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square_x_grass", cg_mesh_make_square(1.0, 1, [-1, 0, 0], Math.PI/2));
+    this.resource_manager.add_procedural_mesh("mesh_vertical_square_y_grass", cg_mesh_make_square(1.0, 1, [0, 1, 0], Math.PI/2));
     this.resource_manager.add_procedural_mesh("mesh_vertical_square_z", cg_mesh_make_square(1.0, 1, [0, 0, 1], Math.PI/4));
 
     this.create_random_fish(
@@ -143,6 +145,14 @@ export class MilestoneScene extends Scene {
       mesh_reference: 'mesh_sphere_env_map',
       material: MATERIALS.diffuse('deep_sea')
     });
+
+    /*
+    this.static_objects.push({
+      translation: [0, 0, 0],
+      scale: [1., 1., 1.],
+      mesh_reference: 'submarine.obj',
+      material: MATERIALS.diffuse('submarine.png')
+    });*/
     
     
     
@@ -156,7 +166,6 @@ export class MilestoneScene extends Scene {
 
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
     place_random_rocks(this.static_objects,terrain_mesh, this.TERRAIN_SCALE,terrain_translation, 100);
-    place_random_grass(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
     
     
     this.objects = this.static_objects.concat(this.dynamic_objects);
@@ -477,61 +486,4 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
   });
   console.log("Corals placed:", coral_count);
 }
-
-
-function place_random_grass(objects, actors, terrain_mesh, TERRAIN_SCALE, terrain_translation){
-  const up_vector = [0,0,1];
-  let coral_count = 0;
   
-  const light_positions = Object.entries(actors)
-    .filter(([name]) => name.startsWith("light_"))
-    .map(([, light]) => light.position);
-  const mean_light = light_positions
-    .reduce((acc, pos) => [acc[0]+pos[0], acc[1]+pos[1], acc[2]+pos[2]], [0,0,0])
-    .map(c => c / light_positions.length);
-
-  terrain_mesh.vertex_positions.forEach((vertex, index) => {
-    const position = vertex;
-    const normal   = terrain_mesh.vertex_normals[index];
-    if (decide(index) !== 0) return;
-    if (position[2] <= -1 || position[2] >= 1) return;
-    if (vec3.angle(up_vector, normal) >= Math.PI/6) return;
-
-    coral_count++;
-    const mesh_opts = ['mesh_vertical_square_x', 'mesh_vertical_square_y'];
-    const min_size = 2.0, max_size = 5.0;
-    const scale_val = min_size + (max_size-min_size) * (pseudo_random_int(index+1234)%1000)/1000;
-    const base_trans = vec3.add(
-      [0,0,0],
-      vec3.mul([0,0,0], TERRAIN_SCALE, position),
-      [terrain_translation[0], terrain_translation[1], terrain_translation[2] + 1.0]
-    );
-
-    mesh_opts.forEach(mesh_reference => {
-      const normal_axis = mesh_reference.endsWith('_x')
-        ? [1,0,0]
-        : [0,1,0];
-
-      const to_light = vec3.sub([0,0,0], mean_light, base_trans);
-      vec3.normalize(to_light, to_light);
-      const dp = vec3.dot(normal_axis, to_light);
-      const angle = dp < 0 ? Math.PI : 0; 
-
-      const coral = {
-        translation: [...base_trans],
-        scale:       [scale_val, scale_val, scale_val],
-        mesh_reference,
-        material:    MATERIALS.diffuse('seagrass.png',true),
-        rotation:    { axis: normal_axis, angle }
-      };
-      coral.evolve = (dt) => {
-        const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
-        coral.scale = [scale_val + pulse, scale_val + pulse, scale_val + pulse];
-      };
-
-      objects.push(coral);
-      actors[`coral_${objects.length}`] = coral;
-    });
-  });
-  console.log("Grass placed:", coral_count);
-}
