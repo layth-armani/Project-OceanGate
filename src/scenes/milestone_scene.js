@@ -46,12 +46,12 @@ export class MilestoneScene extends Scene {
   initialize_scene(){
 
     this.lights.push({
-      position : [5,5,27],
+      position : [5,5,7],
       color: [0.4, 0.4, 0.4]
     });
 
     this.lights.push({
-      position : [0,0,27],
+      position : [0,0,7],
       color: [0.4, 0.4, 0.4]
     });
 

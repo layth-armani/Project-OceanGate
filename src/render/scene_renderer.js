@@ -12,7 +12,7 @@ import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { BloomShaderRenderer } from "./shader_renderers/bloom_sr.js"
 import { BlurShaderRenderer } from "./shader_renderers/gaussian_blur_sr.js"
 import { BloomMixerShaderRenderer } from "./shader_renderers/bloom_mixer_sr.js"
-import { BigBlurShaderRenderer } from "./shader_renderers/big_gaussian_blur_sr.js"
+    
 
 export class SceneRenderer {
 
@@ -43,7 +43,6 @@ export class SceneRenderer {
         
         this.bloom = new BloomShaderRenderer(regl,resource_manager);
         this.blur = new BlurShaderRenderer(regl,resource_manager);
-        this.big_blur = new BigBlurShaderRenderer(regl,resource_manager);
         this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
 
         // Create textures & buffer to save some intermediate renders into a texture
@@ -171,13 +170,10 @@ export class SceneRenderer {
         })
 
         this.render_in_texture("shadows_blurred", () =>{
-            this.big_blur.render(scene_state, this.texture("shadows"), true);
+            this.blur.render(scene_state, this.texture("shadows"), true);
         })
 
-        this.render_in_texture("shadows_blurred", () =>{
-            
-            this.big_blur.render(scene_state, this.texture("shadows"), true);
-        })
+
 
         this.render_in_texture("distances", () =>{
 
@@ -218,7 +214,6 @@ export class SceneRenderer {
 
         // Visualize cubemap
         // this.mirror.env_capture.visualize();
-        let e = performance.now()
         //console.log("Render time: ", e-s);
 
     }
