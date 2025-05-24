@@ -132,6 +132,13 @@ export class MilestoneScene extends Scene {
       material: MATERIALS.diffuse('deep_sea')
     });
 
+    this.static_objects.push({
+      translation: [0, 0, -1],
+      scale: [4., 4., 4.],
+      mesh_reference: 'rock.obj',
+      material: MATERIALS.gray
+    });
+
     const terrain_translation = [0, 0, -10];
     this.static_objects.push({
           translation: terrain_translation,

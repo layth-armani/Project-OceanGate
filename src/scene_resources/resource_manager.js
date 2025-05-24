@@ -169,6 +169,7 @@ export class ResourceManager{
         "fish.obj",
         "suzanne.obj",
         "submarine.obj",
+        "rock.obj",
       ];
     }
 
