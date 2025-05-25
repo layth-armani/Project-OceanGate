@@ -187,7 +187,7 @@ export class MilestoneScene extends Scene {
     });
 
     place_random_corals(this.dynamic_objects, this.actors, terrain_mesh, this.TERRAIN_SCALE, terrain_translation);
-    place_random_rocks(this.static_objects,terrain_mesh, this.TERRAIN_SCALE,terrain_translation, 100);
+    place_random_rocks(this.static_objects,terrain_mesh, this.TERRAIN_SCALE,terrain_translation, 200);
     
     
     this.objects = this.static_objects.concat(this.dynamic_objects);
