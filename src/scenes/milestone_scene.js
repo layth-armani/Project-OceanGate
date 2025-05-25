@@ -524,14 +524,14 @@ function place_random_corals(objects, actors, terrain_mesh, TERRAIN_SCALE, terra
       const angle = dp < 0 ? Math.PI : 0; 
 
       const coral = {
-        translation: [...base_trans],
+        translation: [base_trans[0], base_trans[1], base_trans[2] - 0.5],
         scale:       [scale_val, scale_val, scale_val],
         mesh_reference,
         material:    MATERIALS.diffuse('coral', true, true, 'coral_normal'),
         rotation:    { axis: normal_axis, angle }
       };
       coral.evolve = (dt) => {
-        const pulse = 0.1 * Math.sin(Date.now() * 0.001 + index);
+        const pulse =  0.2 * Math.sin(Date.now() * 0.001 + index);
         coral.scale = [scale_val + pulse, scale_val + pulse, scale_val + pulse];
       };
 
