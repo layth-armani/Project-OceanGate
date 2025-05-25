@@ -31,8 +31,8 @@ export class MilestoneScene extends Scene {
     this.request_follow_fish = false;
 
     const boundary = new BoundedBox(
-      vec3.fromValues(15, 15,7),
-      vec3.fromValues(-15, -15, -2)
+      vec3.fromValues(10, 10, 7),
+      vec3.fromValues(-10, -10, -2)
     )
 
     this.camera.set_boundary(boundary);
@@ -149,7 +149,7 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      100, 
+      300, 
       this.camera.get_boundary()
     );
     
@@ -169,6 +169,7 @@ export class MilestoneScene extends Scene {
     });
 
     this.static_objects.push({
+      obj_name: "submarine_light",
       translation: [0, 0.7, -2.8],
       scale: [0.1, 0.1, 0.1],
       mesh_reference: 'sphere.obj',
@@ -192,13 +193,30 @@ export class MilestoneScene extends Scene {
     
     this.objects = this.static_objects.concat(this.dynamic_objects);
 
-
+    this.actors["light_flickerer"] = {time: 0.7}
   }
 
   /**
    * Initialize the evolve function that describes the behaviour of each actor 
    */
   initialize_actor_actions(){
+
+    this.actors["light_flickerer"].evolve = (dt) => {
+      this.actors["light_flickerer"].time -= dt;
+
+      if (this.actors["light_flickerer"].time <= 0){
+        this.actors["light_flickerer"].time = Math.random() + 0.3;
+
+        const submarine_material = this.static_objects.find(v => v.obj_name == "submarine_light").material;
+        const bl_i = submarine_material.properties.indexOf("extra_bloom");
+
+        if(bl_i >= 0){
+          submarine_material.properties.splice(bl_i);
+        }else{
+          submarine_material.properties.push("extra_bloom");
+        }
+      }
+    }
 
     const boids = Object.keys(this.actors).filter((actor) => this.actors[actor].is_boid).map((actor) => this.actors[actor]);
     let i = 0;
