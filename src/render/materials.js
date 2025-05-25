@@ -48,6 +48,7 @@ class DiffuseMaterial extends Material {
         is_translucent = false,
         apply_normal_map = false,
         normal_map = null,
+        properties = []
     }){
         super()
         this.texture = texture;
@@ -56,6 +57,7 @@ class DiffuseMaterial extends Material {
         this.is_translucent = is_translucent;
         this.apply_normal_map = apply_normal_map;
         this.normal_map = normal_map;
+        this.properties = [...(this.properties ? this.properties : []), ...properties];
     }
 }
 
@@ -85,7 +87,6 @@ class TerrainMaterial extends Material {
 
         this.properties.push("terrain");
         this.properties.push("no_blinn_phong");
-        this.properties.push("no_bloom");
         this.properties.push("no_bloom");
     }
 }
