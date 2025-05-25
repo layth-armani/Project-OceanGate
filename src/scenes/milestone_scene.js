@@ -28,6 +28,7 @@ export class MilestoneScene extends Scene {
     this.dynamic_objects = [];
 
     this.ambient_factor = 0.3;
+    this.request_follow_fish = false;
 
     const boundary = new BoundedBox(
       vec3.fromValues(35, 35,7),
@@ -194,12 +195,23 @@ export class MilestoneScene extends Scene {
   initialize_actor_actions(){
 
     const boids = Object.keys(this.actors).filter((actor) => this.actors[actor].is_boid).map((actor) => this.actors[actor]);
+    let i = 0;
 
     const {max_vel, min_vel, view_distance, avoidance_distance, alignment, cohesion, separation, border, random_force, jitteryness} = this.fish_rules;
 
     for (const boid of boids) {
 
+      boid.actor_name = "fish_" + i++;
+
       boid.evolve = (dt) => {
+
+        if(boid.actor_name == "fish_0"){
+          console.log(this.request_follow_fish)
+        }
+        if (this.request_follow_fish && boid.actor_name == "fish_0"){
+          this.request_follow_fish = false;
+          this.camera.follow_fish(boid);
+        }
 
         const visible_boids = boids.filter((other_boid) => 
           other_boid !== boid && 
@@ -351,6 +363,13 @@ export class MilestoneScene extends Scene {
       )
     });
 
+    create_hotkey_action("Follow fish", "f", () => {
+      if (this.camera.get_fish()) {
+        this.camera.unfollow_fish()
+      }else{
+        this.request_follow_fish = true;
+      }
+    });
   }
 
   create_random_fish(objects, n_fish, bounds){
