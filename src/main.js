@@ -197,7 +197,7 @@ async function main() {
       Update the camera position
     ---------------------------------------------------------------*/
 
-    if(active_scene.camera.is_animation_ongoing()){
+    if(active_scene.camera.is_externally_controlled()){
       active_scene.camera.animate(dt);
     }else{
       active_scene.camera.move_action(
@@ -220,6 +220,9 @@ async function main() {
     // If the time is not paused, iterate over all actors and call their evolve function
     if (!ui_global_params.is_paused){
       for (const name in active_scene.actors){
+        if(!active_scene?.actors?.[name]?.evolve){
+          console.log(active_scene.actors[name])
+        }
         active_scene.actors[name].evolve(dt);
       }
       for (const name in active_scene.actors){
