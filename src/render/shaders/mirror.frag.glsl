@@ -14,6 +14,7 @@ void main()
 	vec3 r = reflect(-v, n);
 
 	// Read the color of the reflection from the cube map
+	if(textureCube(cube_env_map, r).a < 0.1) discard;
 	vec4 result = textureCube(cube_env_map, r);
 	vec3 color = result.xyz;
 

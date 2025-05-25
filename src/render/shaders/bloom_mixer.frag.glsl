@@ -12,7 +12,10 @@ void main()
     float bloom_strength = 0.40;
 
     // get uv coordinates in the canvas 
+    
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+
+    if(texture2D(base_shadows, uv).a < 0.1)discard;
 
     vec3 base_shadows_color = texture2D(base_shadows, uv).rgb;
     vec3 bloom_color =  texture2D(bloom, uv).rgb;

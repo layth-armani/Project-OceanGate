@@ -19,8 +19,10 @@ import { ProceduralTextureGenerator } from "./render/procedural_texture_generato
 // Scenes
 import { TutorialScene } from "./scenes/tutorial_scene.js";
 import { DemoScene } from "./scenes/demo_scene.js";
+import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 import { MilestoneScene } from "./scenes/milestone_scene.js";
 import { FOG_DEFAULT_DISTANCE, FOG_MIN_DISTANCE, FOG_MAX_DISTANCE } from "./render/shader_renderers/fog_mixer_sr.js";
+import { DEFAULT_BLOOM_THRESHOLD, MAX_BLOOM_THRESHOLD } from "./render/shader_renderers/bloom_sr.js";
 // import { distance } from "../lib/gl-matrix_3.3.0/esm/vec3.js";
 
 DOM_loaded_promise.then(main)
@@ -38,6 +40,10 @@ async function main() {
       'OES_texture_float', 'OES_texture_float_linear', 'WEBGL_color_buffer_float',
       'OES_vertex_array_object', 'OES_element_index_uint', 'WEBGL_depth_texture'
     ],
+    attributes: {
+      premultipliedAlpha: true,
+      alpha: true
+    }
   })
 
   // The <canvas> object (HTML element for drawing graphics) was created by REGL: we take a handle to it
@@ -62,6 +68,7 @@ async function main() {
    * Define here your parameters.
    */
   const ui_global_params = {
+    bloom_threshold: DEFAULT_BLOOM_THRESHOLD,
     fog_distance: FOG_DEFAULT_DISTANCE,
     is_paused: false,
   }
@@ -79,6 +86,15 @@ async function main() {
       1
     )
 
+    create_slider(
+      "bloom threshold",
+      [0, n_steps_slider],
+      (i) => {
+        ui_global_params.bloom_threshold = (i / n_steps_slider) * MAX_BLOOM_THRESHOLD;
+      },
+      1
+    )
+
     // Bind a hotkey to hide the overlay
     create_hotkey_action("Hide overlay", "h", ()=>{toggle_overlay_visibility()});
 
@@ -86,7 +102,6 @@ async function main() {
     create_hotkey_action("Pause", "p", () => {
       ui_global_params.is_paused = !ui_global_params.is_paused;
     });
-
   }
 
   /*---------------------------------------------------------------
@@ -163,6 +178,7 @@ async function main() {
   initialize_ui_params();  // add general UI controls
   active_scene.initialize_ui_params();  // add scene-specific UI controls
 
+
   /*---------------------------------------------------------------
     6. Rendering Loop
   ---------------------------------------------------------------*/
@@ -199,6 +215,7 @@ async function main() {
     // Compute the time elapsed since last frame
     dt = frame.time - prev_regl_time;
     prev_regl_time = frame.time;
+
 
     // If the time is not paused, iterate over all actors and call their evolve function
     if (!ui_global_params.is_paused){

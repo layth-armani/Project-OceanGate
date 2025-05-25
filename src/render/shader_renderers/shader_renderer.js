@@ -75,7 +75,13 @@ export class ShaderRenderer {
      * @returns default blend mode
      */
     blend(){
-        return {enable: false};
+        return {
+            enable: true,
+            func: {
+                src: 'src alpha',  // Use the alpha from the source
+                dst: 'one minus src alpha'  // Blend with background based on inverse alpha
+            }
+        };
     }
 
     /**
@@ -111,7 +117,19 @@ export class ShaderRenderer {
 
             cull: this.cull(),
 
-            blend: this.blend(),
+            blend: {
+                enable: true,
+                func: {
+                  srcRGB: 'src alpha',
+                  srcAlpha: 'src alpha',
+                  dstRGB: 'one minus src alpha',
+                  dstAlpha: 'one minus src alpha'
+                }
+              },
+              depth: {
+                enable: true,
+                mask: false // Don't write to depth buffer for transparent objects
+              },
         
             // Uniforms: global data available to the shader
             uniforms: this.uniforms(regl),

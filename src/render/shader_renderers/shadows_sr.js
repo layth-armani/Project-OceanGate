@@ -24,6 +24,17 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
         // Here we instanciante the ShadowMapShaderRenderer directly into the ShadowsShaderRenderer 
         // because the latter needs to pass shadow_map render function to the env_capture to generate the cube_map 
         this.shadow_map = new ShadowMapShaderRenderer(regl, resource_manager);
+
+        this.pipeline = regl({
+            vert: this.vert_shader,
+            frag: this.frag_shader,
+            attributes: this.attributes(regl),
+            uniforms: this.uniforms(regl),
+            depth: this.depth(),            // uses dynamic mask
+            blend: this.blend(),            // uses dynamic enable
+            elements: regl.prop('mesh.faces'),
+            cull: this.cull()
+        });
     }
 
     /**
@@ -35,6 +46,7 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
 
         const scene = scene_state.scene;
         const inputs = [];
+      
 
         // For every light build a shadow map and do a render of the shadows
         this.regl.clear({color: [0,0,0,1]});
@@ -53,6 +65,8 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
                 if(this.exclude_object(obj)) continue;
 
                 const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
+                const {texture, is_textured} = texture_data(obj, this.resource_manager);
+                const is_translucent = obj.material.is_translucent;
                 
                 const { 
                     mat_model_view, 
@@ -60,7 +74,9 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
                     mat_normals_model_view 
                 } = scene.camera.object_matrices.get(obj);
 
-                inputs.push({
+                const camera_z = mat_model_view[14];
+
+                const entry = {
                     mesh: mesh,
 
                     mat_model_view_projection: mat_model_view_projection,
@@ -68,12 +84,19 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
 
                     light_position_cam : light_position_cam,
                     num_lights: num_lights,
+                    material_texture: texture,
+                    is_textured: is_textured,
+                    material_base_color: obj.material.color,
+                    is_translucent: is_translucent,
 
                     cube_shadowmap: cube_shadowmap,
-                });
+                    camera_z
+                };
+    
+                inputs.push(entry)
             }
-
             this.pipeline(inputs);
+
         });
     }
 
@@ -95,25 +118,28 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
     }
 
 
+    cull(){
+        return { enable: true, face: 'back'};
+    }
+
     depth(){
-        // Use the z-buffer
         return {
             enable: true,
             mask: true,
-            func: '<=',
+            func: '<='
         };
     }
 
     blend(){
-        // Additive blend mode
         return {
-            enable: true,
-            func: {
+              enable: true,
+              func: {
                 src: 1,
                 dst: 1,
-            },
-        };
+              }
+            }
     }
+
 
     uniforms(regl){
         return{
@@ -127,6 +153,10 @@ export class ShadowsShaderRenderer extends ShaderRenderer {
 
             // Cube map
             cube_shadowmap: regl.prop('cube_shadowmap'),
+            material_texture: regl.prop('material_texture'),
+            is_textured: regl.prop('is_textured'),
+            material_base_color: regl.prop('material_base_color'),
+            is_translucent: regl.prop('is_translucent')
         };
     }
 

@@ -45,7 +45,6 @@ export class SceneRenderer {
         this.bloom = new BloomShaderRenderer(regl,resource_manager);
         this.anti_bloom = new AntiBloomShaderRenderer(regl,resource_manager);
         this.blur = new BlurShaderRenderer(regl,resource_manager);
-        this.big_blur = new BigBlurShaderRenderer(regl,resource_manager);
         this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
 
         // Create textures & buffer to save some intermediate renders into a texture
@@ -111,6 +110,7 @@ export class SceneRenderer {
      * @param {*} scene_state the description of the scene, time, dynamically modified parameters, etc.
      */
     render(scene_state) {
+        let s = performance.now()
         
         const scene = scene_state.scene;
         const frame = scene_state.frame;
@@ -139,17 +139,18 @@ export class SceneRenderer {
             // Render the background
             this.flat_color.render(scene_state);
 
-            // Render the terrain
-            this.terrain.render(scene_state);
-
-            // Render shaded objects
             this.blinn_phong.render(scene_state);
+
+            //this.terrain.render(scene_state);
+
+
+
 
             // Render the reflection of mirror objects on top
             this.mirror.render(scene_state, (s_s) => {
                 this.pre_processing.render(scene_state);
                 this.flat_color.render(s_s);
-                this.terrain.render(scene_state);
+                //this.terrain.render(scene_state);
                 this.blinn_phong.render(s_s);
             });    
         })
@@ -167,6 +168,7 @@ export class SceneRenderer {
 
             // Render the shadows
             this.shadows.render(scene_state);
+            
         })
         
 
@@ -176,10 +178,14 @@ export class SceneRenderer {
             //this.big_blur.render(scene_state, this.texture("shadows"), true);
         })
 
+
+
         this.render_in_texture("distances", () =>{
 
             this.shadow_map.render(scene_state);
+
         })
+
 
         /*---------------------------------------------------------------
             3. Compositing
@@ -191,7 +197,7 @@ export class SceneRenderer {
         });
 
         this.render_in_texture("bloom", () => {
-            this.bloom.render(scene_state, this.texture("with_shadows"));
+            this.bloom.render(scene_state, this.texture("with_shadows"),scene_state.ui_params.bloom_threshold);
 
             this.anti_bloom.render(scene_state, this.texture("bloom"), this.texture("distances"));
         })
@@ -205,6 +211,7 @@ export class SceneRenderer {
         })
 
 
+        //this.shadows.render(scene_state);
 
         //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
         //this.bloom.render(scene_state, this.texture("with_shadows"));
@@ -212,6 +219,12 @@ export class SceneRenderer {
 
 
         this.fog_mixer.render(scene_state, this.texture("distances"), this.texture("scene_with_bloom"), scene_state.ui_params.fog_distance);
+        //this.map_mixer.render(scene_state, this.texture("shadows"), this.texture("base"));
+
+        // Visualize cubemap
+        // this.mirror.env_capture.visualize();
+        //console.log("Render time: ", e-s);
+
     }
 }
 

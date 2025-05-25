@@ -9,9 +9,15 @@ export const noise_functions = {
     Perlin: "tex_perlin",
     FBM: "tex_fbm",
     Turbulence: "tex_turbulence",
+    Dendry: "tex_dendry",
     Map: "tex_map",
     Wood: "tex_wood",
-    FBM_for_terrain: "tex_fbm_for_terrain"
+    Sand: "tex_sand",
+    DeepSea: "tex_deep_sea",
+    Coral: "tex_coral",
+    Coral_Normal: "tex_coral_normal",
+    FBM_for_terrain: "tex_fbm_for_terrain",
+    Rock:"tex_rock"
 };
 
 
@@ -66,7 +72,7 @@ export class NoiseShaderRenderer extends ShaderRenderer {
      * @returns 
      */
     generate_frag_shader(shader_func_name) {
-
+        let returns_vec4 = ['tex_coral'].includes(shader_func_name);
         return `${this.frag_shader}
     
         // --------------
@@ -74,10 +80,37 @@ export class NoiseShaderRenderer extends ShaderRenderer {
         varying vec2 v2f_tex_coords;
 
         void main() {
-        vec3 color = ${shader_func_name}(v2f_tex_coords);
-        gl_FragColor = vec4(color, 1.0);
+            ${returns_vec4 ? 
+            `vec4 color_with_alpha = ${shader_func_name}(v2f_tex_coords);
+             gl_FragColor = color_with_alpha;` 
+            : 
+            `vec3 color = ${shader_func_name}(v2f_tex_coords);
+             gl_FragColor = vec4(color, 1.);`
+        }
+            
         }
         `;
+    }
+
+    depth(){
+        // Use z buffer
+        return {
+            enable: true,
+            mask: false,
+            func: '<=',
+        };
+    }
+    
+    blend(){
+        return {
+            enable: true,
+            func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+            }
+        };
     }
 
     // Overwrite the pipeline

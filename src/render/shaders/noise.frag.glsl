@@ -265,7 +265,7 @@ vec3 tex_turbulence(vec2 point) {
 }
 
 // ==============================================================
-// Procedural "map" texture
+// Procedural map texture
 
 const float terrain_water_level = -0.075;
 const vec3 terrain_color_water = vec3(0.29, 0.51, 0.62);
@@ -325,3 +325,218 @@ vec3 tex_marble(vec2 point) {
 }
 
 
+
+// ==============================================================
+// Procedural "sand" texture
+vec3 tex_sand(vec2 point) {
+    float h = perlin_fbm(point);  
+    h = (h + 1.0) * 0.5;                
+
+    vec3 base_color;
+    if (h < 0.2) {
+        base_color = vec3(0.75, 0.65, 0.55); 
+    } else if (h < 0.4) {
+        base_color = vec3(0.85, 0.75, 0.55);
+    } else if (h < 0.6) {
+        base_color = vec3(0.95, 0.85, 0.65); 
+    } else if (h < 0.8) {
+        base_color = vec3(0.90, 0.78, 0.60); 
+    } else {
+        base_color = vec3(0.98, 0.92, 0.75);
+    }
+
+    float grain = pow(turbulence(point * 20.0), 3.0) * 0.25;
+	grain = smoothstep(0.4, 0.7, grain); 
+
+    float speckle = fract(sin(dot(point * 40.0, vec2(12.9898, 78.233))) * 43758.5453);
+    speckle = step(0.8, speckle);
+    vec3 speckle_color = vec3(1.0, 0.98, 0.9) * speckle * 0.6;
+
+    vec3 final_color = base_color + vec3(grain) + speckle_color;
+    return clamp(final_color, 0.0, 1.0);
+}
+
+// ==============================================================
+// Procedural "deep sea" texture
+vec3 tex_deep_sea(vec2 point) {
+    vec3 deep_color = vec3(0.0, 0.2, 0.4); 
+    vec3 shallow_color = vec3(0.0, 0.6, 0.8); 
+
+    float noise = perlin_fbm(point * 5.0);
+    noise = (noise + 1.0) * 0.5; 
+
+    // Add turbulence for dynamic effects
+    float turbulence_effect = turbulence(point * 10.0) * 0.2;   
+
+    float intensity = clamp(noise + turbulence_effect, 0.0, 1.0);
+
+    vec3 color = mix(deep_color, shallow_color, intensity);
+
+    color *= 1.5; 
+
+    return clamp(color, 0.0, 1.0);
+}
+
+vec3 tex_rock(vec2 point) {
+    // Base rock color
+    vec3 base_color = vec3(0.38, 0.36, 0.32);
+
+    // Layered noise for roughness and color variation
+    float n1 = perlin_fbm(point * 8.0) * 0.5 + 0.5;
+    float n2 = perlin_fbm(point * 16.0) * 0.5 + 0.5;
+    float n3 = turbulence(point * 10.0) * 0.2;
+
+    // Less directional veins: use a circular pattern and noise
+    float angle = atan(point.y, point.x);
+    float radius = length(point);
+    float veins = smoothstep(0.45, 0.55, sin(radius * 10.0 + angle * 4.0 + n2 * 6.0)) * 0.10;
+    veins += smoothstep(0.48, 0.52, perlin_noise(point * 20.0 + n1 * 5.0)) * 0.08;
+
+    // Softer speckles
+    float speckle = fract(sin(dot(point * 18.0, vec2(12.9898, 78.233))) * 43758.5453);
+    speckle = smoothstep(0.85, 1.0, speckle);
+    vec3 speckle_color = vec3(0.7, 0.7, 0.6) * speckle * 0.3;
+
+    // Blend everything together for a more faded, less pixelated look
+    vec3 color = base_color * (0.8 + 0.3 * n1 - 0.1 * n2) + n3 - veins + speckle_color;
+
+    // Add a gentle fade for more depth
+    color = mix(color, base_color, 0.2 * n2);
+
+    return clamp(color, 0.0, 1.0);
+}
+
+// ==============================================================
+// Dendry Noise
+
+const vec2 resolution = vec2(100., 100.);
+const float  levels = 3.;
+const float max_levels = 10.;
+const float epsilon = 0.25;
+const float delta = 0.05;
+const float gridSize = 4.;
+const float beta = 1.5;
+
+vec2 hash22(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)),
+             dot(p, vec2(269.5, 183.3)));
+    return fract(sin(p) * 43758.5453);
+}
+
+float segmentDistance(vec2 p, vec2 a, vec2 b){
+	vec2 ab = b - a;
+    vec2 ap = a - b;
+	float t = clamp(dot(ap,ab)/ dot(ab,ab), 0., 1.);
+	vec2 proj = a + t * ab;
+	return distance(p, proj);
+}
+
+vec2 generateKeyPos(float i, float j, float gridN, float epsilon) {
+    float fx = (i + 0.5) / gridN;
+    float fy = (j + 0.5) / gridN;
+    
+    vec2 rand = hash22(vec2(float(i), float(j)));
+    rand = rand * 2. - 1.;
+    
+    float jitterRange = (0.5 - epsilon) / float(gridN);
+    vec2 jitter = rand * jitterRange;
+
+    return vec2(fx + jitter.x, fy + jitter.y) * resolution;
+}
+
+float dendry(vec2 point){
+	
+	float sum = 0.;
+    
+    for (float k = 0.0; k < max_levels; k++) {
+        if (k >= levels) break; 
+        
+        float gridSize = (gridSize * pow(2., k));
+        
+        float baseI = (point.x / resolution.x * gridSize);
+        float baseJ = (point.y / resolution.y * gridSize);
+
+        for (int dj = -1; dj <= 1; dj++) {
+            for (int di = -1; di <= 1; di++) {
+                float ci = baseI + float(di);
+                float cj = baseJ + float(dj);
+                
+                if (ci < 0. || cj < 0. || ci >= gridSize || cj >= gridSize) 
+                    continue;
+                    
+                vec2 centerPos = generateKeyPos(ci, cj, gridSize, epsilon);
+                
+				float ni0 = ci + 1.;
+				float ni1 = ci;
+				float ni2 = ci + 1.;
+				float nj0 = cj;
+				float nj1 = cj + 1.;
+				float nj2 = cj + 1.;
+                
+                if (!(ni0 < 0. || nj0 < 0. || ni0 >= gridSize || nj0 >= gridSize)) {
+					vec2 neighborPos = generateKeyPos(float(ni0), float(nj0), gridSize, epsilon);
+					float d = segmentDistance(point, centerPos, neighborPos);
+					sum += pow(d, -beta);
+				}
+
+				if (!(ni1 < 0. || nj1 < 0. || ni1 >= gridSize || nj1 >= gridSize)) {
+					vec2 neighborPos = generateKeyPos(float(ni1), float(nj1), gridSize, epsilon);
+					float d = segmentDistance(point, centerPos, neighborPos);
+					sum += pow(d, -beta);
+				}
+
+		
+				if (!(ni2 < 0. || nj2 < 0. || ni2 >= gridSize || nj2 >= gridSize)) {
+					vec2 neighborPos = generateKeyPos(float(ni2), float(nj2), gridSize, epsilon);
+					float d = segmentDistance(point, centerPos, neighborPos);
+					sum += pow(d, -beta);
+				}
+            }
+        }
+    }
+    
+    return pow(sum, -1. / beta);
+}
+
+vec3 tex_dendry(vec2 point) {
+	float noise_val = dendry(point) + 0.5;
+	return vec3(noise_val);
+}
+
+// ==============================================================
+// Procedural "coral" texture
+
+vec4 tex_coral(vec2 point) {
+    float n = perlin_fbm(point * 5.0) * 0.5 + 0.5;
+
+    float fb = smoothstep(0.4, 0.6, n) - smoothstep(0.6, 0.8, n);
+
+    float d = dendry(point * 6.0);
+    d = (d + 1.0) * 0.5;
+    float sk = smoothstep(0.45, 0.55, d);
+
+    float branch_mask = (fb + fb * sk*2.) *1.2;
+
+ 
+    branch_mask = smoothstep(0.0, 1., branch_mask);
+
+    float detail = perlin_noise(point * 50.0) * 0.5 + 0.5;
+    vec3 coral_base = mix(vec3(1.0, 0.5, 0.3), vec3(1.0, 0.7, 0.5), detail);
+
+    return vec4(coral_base, branch_mask);
+}
+
+// ==============================================================
+// Generate normal map from alpha as height
+
+vec3 tex_coral_normal(vec2 point) {
+    float eps = 1.0 / 256.0;
+    float hR = tex_coral(point + vec2(eps, 0.0)).a;
+    float hL = tex_coral(point - vec2(eps, 0.0)).a;
+    float hU = tex_coral(point + vec2(0.0, eps)).a;
+    float hD = tex_coral(point - vec2(0.0, eps)).a;
+    vec3 dx = vec3(eps, 0.0, hR - hL);
+    vec3 dy = vec3(0.0, eps, hU - hD);
+    vec3 normal = normalize(cross(dy, dx));
+    return normal;
+}

@@ -12,10 +12,13 @@ void main()
 {
     float fog_max_distance = fog_distance; // @todo find correct value
 
+
     vec3 fog_factor_color = vec3(0., 0.102, 0.2); // @todo tweak this
 
     // get uv coordinates in the canvas 
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+    if(texture2D(blinn_phong, uv).a < 0.1)discard;
+
 
     float distance_to_uv = texture2D(distances, uv).x;
 
@@ -31,6 +34,7 @@ void main()
     if (fog_factor > 0.0){
         color = fog_color;
     }
+    
 
     gl_FragColor = vec4(color, 1.); // output: RGBA in 0..1 range
 }

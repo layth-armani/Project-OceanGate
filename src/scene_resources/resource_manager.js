@@ -139,7 +139,7 @@ export class ResourceManager{
             'pine.png',
             'fish.png',
             'night_sky.jpg',
-            'submarine.png'
+            'submarine.png',
           ];
     }
 
@@ -159,7 +159,6 @@ export class ResourceManager{
             'bloom.vert.glsl', 'bloom.frag.glsl',
             'anti_bloom.vert.glsl', 'anti_bloom.frag.glsl',
             'gaussian_blur.vert.glsl','gaussian_blur.frag.glsl',
-            'big_gaussian_blur.vert.glsl','big_gaussian_blur.frag.glsl',
             'bloom_mixer.vert.glsl', 'bloom_mixer.frag.glsl'
           ];
     }
@@ -170,6 +169,7 @@ export class ResourceManager{
         "fish.obj",
         "suzanne.obj",
         "submarine.obj",
+        "rock.obj",
       ];
     }
 

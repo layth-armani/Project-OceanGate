@@ -68,6 +68,18 @@ export class FlatColorShaderRenderer extends ShaderRenderer {
         };
     }
 
+    blend(){
+        return {
+            enable: true,
+            func: {
+                srcRGB: 'src alpha',
+                srcAlpha: 'src alpha',
+                dstRGB: 'one minus src alpha',
+                dstAlpha: 'one minus src alpha'
+            }
+        };
+    }
+
     uniforms(regl){        
         return {
             // View (camera) related matrix

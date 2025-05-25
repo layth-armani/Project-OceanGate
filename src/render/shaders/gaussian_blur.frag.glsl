@@ -20,6 +20,7 @@ void main(){
     vec2 tex_offset = 1.0 / texSize;
     
     vec2 uv = (canvas_pos.xy / canvas_pos.w) * 0.5 + 0.5;
+    if(texture2D(image, uv).a < 0.1)discard;
     vec3 result = texture2D(image, uv).rgb * weight[0]; 
 
     // Horizontal blur pass
