@@ -53,12 +53,16 @@ export class POVCamera {
         this.update_cam_transform();
     }
 
-    follow_fish(fish){
+    follow_fish(fish) {
         this.fish = fish;
+        this.smoothedVelocity = vec3.clone(fish.velocity);
+        this.smoothedPosition = vec3.clone(fish.translation);
     }
 
     unfollow_fish(){
         this.fish = null;
+        this.smoothedVelocity = null;
+        this.smoothedPosition = null;
     }
 
     get_fish(){
@@ -73,9 +77,8 @@ export class POVCamera {
         return this.animation != null || this.fish != null;
     }
 
-    animate(dt){
-        
-        if(this.animation){
+    animate(dt) {
+        if(this.animation) {
             if(this.animation.is_animation_finished()){
                 this.animation = null;
             } else {
@@ -83,18 +86,23 @@ export class POVCamera {
                 this.set_pos(pos);
                 this.set_look_dir(look);
             }
-        }else if(this.fish){
-            const forward_vec = vec3.normalize(vec3.create(), this.fish.velocity);
+        } else if(this.fish) {
+            const smoothFactor = 0.5;
+            
+            vec3.lerp(this.smoothedVelocity, this.smoothedVelocity, this.fish.velocity, smoothFactor);
+            vec3.lerp(this.smoothedPosition, this.smoothedPosition, this.fish.translation, smoothFactor);
+            
+            const forward_vec = vec3.normalize(vec3.create(), this.smoothedVelocity);
             const right_vec = vec3.cross(vec3.create(), forward_vec, [0, 0, 1])
             const up_vec = vec3.cross(vec3.create(), right_vec, forward_vec)
             vec3.normalize(up_vec, up_vec);
 
             const cam_pos = vec3.scale(vec3.create(), forward_vec, -4)
             vec3.add(cam_pos, cam_pos, up_vec);
-            vec3.add(cam_pos, this.fish.translation, cam_pos)
+            vec3.add(cam_pos, this.smoothedPosition, cam_pos)
 
             this.set_pos(cam_pos);
-            this.set_look_dir(vec3.normalize(vec3.create(), this.fish.velocity))
+            this.set_look_dir(vec3.normalize(vec3.create(), this.smoothedVelocity));
         }
     }
 
