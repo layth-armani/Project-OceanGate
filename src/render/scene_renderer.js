@@ -12,7 +12,8 @@ import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { BloomShaderRenderer } from "./shader_renderers/bloom_sr.js"
 import { BlurShaderRenderer } from "./shader_renderers/gaussian_blur_sr.js"
 import { BloomMixerShaderRenderer } from "./shader_renderers/bloom_mixer_sr.js"
-
+import { BigBlurShaderRenderer } from "./shader_renderers/big_gaussian_blur_sr.js"
+import { AntiBloomShaderRenderer } from "./shader_renderers/anti_bloom_sr.js"
 
 export class SceneRenderer {
 
@@ -42,6 +43,7 @@ export class SceneRenderer {
         this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
         
         this.bloom = new BloomShaderRenderer(regl,resource_manager);
+        this.anti_bloom = new AntiBloomShaderRenderer(regl,resource_manager);
         this.blur = new BlurShaderRenderer(regl,resource_manager);
         this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
 
@@ -50,7 +52,7 @@ export class SceneRenderer {
         this.create_texture_and_buffer("shadows_blurred", {});
         this.create_texture_and_buffer("base", {});
         this.create_texture_and_buffer("with_shadows", {});
-        this.create_texture_and_buffer("bloom", {});  
+        this.create_texture_and_buffer("bloom", {});
         this.create_texture_and_buffer("blurred_bloom", {});
         this.create_texture_and_buffer("scene_with_bloom", {});
         this.create_texture_and_buffer("distances", {}); 
@@ -168,9 +170,12 @@ export class SceneRenderer {
             this.shadows.render(scene_state);
             
         })
+        
 
         this.render_in_texture("shadows_blurred", () =>{
+            
             this.blur.render(scene_state, this.texture("shadows"), true);
+            //this.big_blur.render(scene_state, this.texture("shadows"), true);
         })
 
 
@@ -193,6 +198,8 @@ export class SceneRenderer {
 
         this.render_in_texture("bloom", () => {
             this.bloom.render(scene_state, this.texture("with_shadows"),scene_state.ui_params.bloom_threshold);
+
+            this.anti_bloom.render(scene_state, this.texture("bloom"), this.texture("distances"));
         })
         
         this.render_in_texture("blurred_bloom", () => {

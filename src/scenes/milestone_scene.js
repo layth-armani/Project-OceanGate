@@ -35,7 +35,18 @@ export class MilestoneScene extends Scene {
     this.camera.set_boundary(boundary);
     this.camera.set_pos(boundary.get_center())
     
-    
+    this.fish_rules = {
+      max_vel: 3, 
+      min_vel: 1, 
+      view_distance: 3, 
+      avoidance_distance: 1.5, 
+      alignment: 1.5, 
+      cohesion: 0.1, 
+      separation: 1.5, 
+      border: 10,
+      random_force: 1,
+      jitteryness: 0.9
+    }
 
     this.initialize_scene();
     this.initialize_actor_actions();
@@ -134,9 +145,8 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      100, 
-      this.camera.get_boundary(),
-      {max_vel: 3, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 10}
+      200, 
+      this.camera.get_boundary()
     );
     
     this.static_objects.push({
@@ -183,7 +193,7 @@ export class MilestoneScene extends Scene {
 
     const boids = Object.keys(this.actors).filter((actor) => this.actors[actor].is_boid).map((actor) => this.actors[actor]);
 
-    const {max_vel, min_vel, view_distance, avoidance_distance, alignment, cohesion, separation, border} = this.fish_rules;
+    const {max_vel, min_vel, view_distance, avoidance_distance, alignment, cohesion, separation, border, random_force, jitteryness} = this.fish_rules;
 
     for (const boid of boids) {
 
@@ -197,6 +207,16 @@ export class MilestoneScene extends Scene {
         const alignment_vector = vec3.create();
         const cohesion_vector = vec3.create();
         const separation_vector = vec3.create();
+
+        if(!boid.random_point || !boid.random_point_time || boid.random_point_time <= 0){
+          boid.random_point = vec3.random(vec3.create(), vec3.len(boid.velocity))
+
+          const t = (1- jitteryness)
+          boid.random_point_time = 0.5 + t * 9.5
+        }
+        boid.random_point_time -= dt;
+        const noise_vector = this.slerp(boid.velocity, boid.random_point, 0.3)
+        vec3.scale(noise_vector, noise_vector, random_force);
 
         if(visible_boids && visible_boids.length != 0){
         
@@ -230,6 +250,7 @@ export class MilestoneScene extends Scene {
         vec3.scale(border_vector, boid.bounds.compare_to_bounds(boid.translation), -border);
 
         const new_velocity = vec3.clone(boid.velocity);
+        vec3.add(new_velocity, new_velocity, noise_vector);
         vec3.add(new_velocity, new_velocity, alignment_vector);
         vec3.add(new_velocity, new_velocity, cohesion_vector);
         vec3.add(new_velocity, new_velocity, separation_vector);
@@ -266,6 +287,18 @@ export class MilestoneScene extends Scene {
         coral.evolve;
       }
     }
+  }
+
+  slerp(a, b, t){
+    const omega = vec3.angle(a, b);
+
+    const a_factor = Math.sin((1-t) * omega) / Math.sin(omega);
+    const b_factor = Math.sin(t * omega) / Math.sin(omega);
+
+    let c = vec3.scale(vec3.create(), a, a_factor);
+    let d = vec3.scale(vec3.create(), b, b_factor);
+
+    return vec3.add(vec3.create(), c, d);
   }
 
   /**
@@ -318,7 +351,8 @@ export class MilestoneScene extends Scene {
 
   }
 
-  create_random_fish(objects, n_fish, bounds, fish_rules){
+  create_random_fish(objects, n_fish, bounds){
+    const fish_rules = this.fish_rules;
     if(!fish_rules || !fish_rules.max_vel || !fish_rules.alignment || !fish_rules.cohesion || !fish_rules.separation || !fish_rules.border){
       throw new Error("Invalid fish rules");
     }
