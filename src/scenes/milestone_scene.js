@@ -167,6 +167,14 @@ export class MilestoneScene extends Scene {
       mesh_reference: 'submarine.obj',
       material: MATERIALS.diffuse('submarine.png', false, false, null, [1, 1, 1])
     });
+
+    this.static_objects.push({
+      translation: [8, 8, -4],
+      scale: [0.8, 0.8, 0.8],
+      mesh_reference: 'sphere.obj',
+      material: MATERIALS.gold,
+      properties: ["extra_bloom"]
+    })
     
     
     
@@ -195,17 +203,15 @@ export class MilestoneScene extends Scene {
     const boids = Object.keys(this.actors).filter((actor) => this.actors[actor].is_boid).map((actor) => this.actors[actor]);
     let i = 0;
 
-    const {max_vel, min_vel, max_acceleration, view_distance, avoidance_distance, alignment, cohesion, separation, border, random_force, jitteryness} = this.fish_rules;
-
     for (const boid of boids) {
 
       boid.actor_name = "fish_" + i++;
 
       boid.evolve = (dt) => {
 
-        if(boid.actor_name == "fish_0"){
-          console.log(this.request_follow_fish)
-        }
+        const {max_vel, min_vel, max_acceleration, view_distance, avoidance_distance, alignment, cohesion, separation, border, random_force, jitteryness} = this.fish_rules;
+
+
         if (this.request_follow_fish && boid.actor_name == "fish_0"){
           this.request_follow_fish = false;
           this.camera.follow_fish(boid);
@@ -224,7 +230,7 @@ export class MilestoneScene extends Scene {
           boid.random_point = vec3.random(vec3.create(), vec3.len(boid.velocity))
 
           const t = (1- jitteryness)
-          boid.random_point_time = 0.5 + t * 9.5
+          boid.random_point_time = 0.2 + t * 9.5
         }
         boid.random_point_time -= dt;
         const noise_vector = this.slerp(boid.velocity, boid.random_point, 0.3)
@@ -376,9 +382,9 @@ export class MilestoneScene extends Scene {
       "min velocity",
       [0, n_steps_slider],  
       (i) => {
-        const new_min_vel = 0.5 + (i / n_steps_slider) * 3.5;
+        const new_min_vel = 0.5 + (i / n_steps_slider) * 19.5;
         if(new_min_vel > this.fish_rules.max_vel){
-          return;
+          this.fish_rules.max_vel = new_min_vel;
         }
         this.fish_rules.min_vel = new_min_vel;
       }
@@ -388,9 +394,9 @@ export class MilestoneScene extends Scene {
       "max velocity",
       [0, n_steps_slider],  
       (i) => {
-        const new_max_vel = 2 + (i / n_steps_slider) * 4;
+        const new_max_vel = 2 + (i / n_steps_slider) * 30;
         if(new_max_vel < this.fish_rules.min_vel){
-          return;
+           this.fish_rules.min_vel = new_max_vel;
         }
         this.fish_rules.max_vel = new_max_vel;
       }
@@ -400,7 +406,7 @@ export class MilestoneScene extends Scene {
       "max acceleration",
       [0, n_steps_slider],  
       (i) => {
-        const new_max_acc = 2 + (i / n_steps_slider) * 18;
+        const new_max_acc = 2 + (i / n_steps_slider) * 40;
 
         this.fish_rules.max_acceleration = new_max_acc;
       }
@@ -410,7 +416,7 @@ export class MilestoneScene extends Scene {
       "view distance",
       [0, n_steps_slider],  
       (i) => {
-        const new_view_dist = 1 + (i / n_steps_slider) * 4;
+        const new_view_dist = 1 + (i / n_steps_slider) * 9;
 
         this.fish_rules.view_distance = new_view_dist;
       }
@@ -420,7 +426,7 @@ export class MilestoneScene extends Scene {
       "avoidance distance",
       [0, n_steps_slider],  
       (i) => {
-        const new_avoidance_dist = 0.5 + (i / n_steps_slider) * 2.5;
+        const new_avoidance_dist = 0.5 + (i / n_steps_slider) * 9.5;
 
         this.fish_rules.avoidance_distance = new_avoidance_dist;
       }
@@ -430,7 +436,7 @@ export class MilestoneScene extends Scene {
       "alignment force",
       [0, n_steps_slider],  
       (i) => {
-        const new_alignment = 0.5 + (i / n_steps_slider) * 2.5;
+        const new_alignment = 0.5 + (i / n_steps_slider) * 9.5;
 
         this.fish_rules.alignment = new_alignment;
       }
@@ -440,7 +446,7 @@ export class MilestoneScene extends Scene {
       "cohesion force",
       [0, n_steps_slider],  
       (i) => {
-        const new_cohesion = 0.02 + (i / n_steps_slider) * 0.28;
+        const new_cohesion = 0.02 + (i / n_steps_slider) * 4;
 
         this.fish_rules.cohesion = new_cohesion;
       }
@@ -450,7 +456,7 @@ export class MilestoneScene extends Scene {
       "separation force",
       [0, n_steps_slider],  
       (i) => {
-        const new_separation = 0.5 + (i / n_steps_slider) * 3.5;
+        const new_separation = 0.5 + (i / n_steps_slider) * 9.5;
 
         this.fish_rules.separation = new_separation;
       }
@@ -460,7 +466,7 @@ export class MilestoneScene extends Scene {
       "border force",
       [0, n_steps_slider],  
       (i) => {
-        const new_border = 1 + (i / n_steps_slider) * 99;
+        const new_border = 1 + (i / n_steps_slider) * 300;
 
         this.fish_rules.border = new_border;
       }
@@ -470,7 +476,7 @@ export class MilestoneScene extends Scene {
       "randomness force",
       [0, n_steps_slider],  
       (i) => {
-        const new_random = 0.5 + (i / n_steps_slider) * 4.5;
+        const new_random = 0.5 + (i / n_steps_slider) * 29.5;
 
         this.fish_rules.random_force = new_random;
       }

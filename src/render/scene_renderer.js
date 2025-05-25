@@ -45,6 +45,7 @@ export class SceneRenderer {
         this.bloom = new BloomShaderRenderer(regl,resource_manager);
         this.anti_bloom = new AntiBloomShaderRenderer(regl,resource_manager);
         this.blur = new BlurShaderRenderer(regl,resource_manager);
+        this.big_blur = new BigBlurShaderRenderer(regl,resource_manager);
         this.fog_mixer = new FogMixerShaderRenderer(regl, resource_manager);
 
         // Create textures & buffer to save some intermediate renders into a texture
@@ -197,13 +198,15 @@ export class SceneRenderer {
         });
 
         this.render_in_texture("bloom", () => {
+            this.pre_processing.render(scene_state);
+
             this.bloom.render(scene_state, this.texture("with_shadows"),scene_state.ui_params.bloom_threshold);
 
             this.anti_bloom.render(scene_state, this.texture("bloom"), this.texture("distances"));
         })
         
         this.render_in_texture("blurred_bloom", () => {
-            this.blur.render(scene_state, this.texture("bloom"));
+            this.big_blur.render(scene_state, this.texture("bloom"));
         })
 
         this.render_in_texture("scene_with_bloom", () => {

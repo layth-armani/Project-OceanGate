@@ -53,7 +53,8 @@ export class BloomShaderRenderer extends ShaderRenderer{
                 threshold: threshold,
                 texture: texture,
                 is_translucent: is_translucent,
-                camera_z: camera_z
+                camera_z: camera_z,
+                extra_bloom: obj.material.properties.includes("extra_bloom")
             };
 
             inputs.push(entry)
@@ -96,7 +97,9 @@ export class BloomShaderRenderer extends ShaderRenderer{
             material_base_color: regl.prop('material_base_color'),
             threshold: regl.prop('threshold'),
             texture: regl.prop('texture'),
-            is_translucent: regl.prop('is_translucent')
+            is_translucent: regl.prop('is_translucent'),
+
+            extra_bloom: regl.prop('extra_bloom')
         };
     }
 }

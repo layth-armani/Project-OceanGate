@@ -118,7 +118,8 @@ export const ochre = new DiffuseMaterial({
 
 export const gold = new DiffuseMaterial({
     texture: 'tex_gold',
-    shininess: 14.0
+    shininess: 14.0,
+    properties: ["extra_bloom"]
 });
 
 export const terrain = new TerrainMaterial({

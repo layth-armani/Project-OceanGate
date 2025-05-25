@@ -4,6 +4,7 @@ varying vec4 canvas_pos;
 
 uniform float threshold;
 uniform sampler2D texture;
+uniform bool extra_bloom;
 
 void main(){
 
@@ -17,12 +18,14 @@ void main(){
     float brightness = dot(color, luminance);
 
         
-    if(brightness > threshold ){
+    if(brightness > threshold){
 
         gl_FragColor = vec4(color, 1.);
     }
-    else{
-        gl_FragColor = vec4(0. , 0., 0., 1);
+    else if (extra_bloom){
+        gl_FragColor = vec4(color * 100., 1.);
+    }else{
+        discard;
     }
         
     }
