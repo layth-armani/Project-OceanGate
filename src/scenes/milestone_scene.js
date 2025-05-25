@@ -27,8 +27,10 @@ export class MilestoneScene extends Scene {
     this.static_objects = [];
     this.dynamic_objects = [];
 
+    this.ambient_factor = 0.3;
+
     const boundary = new BoundedBox(
-      vec3.fromValues(35, 35,10),
+      vec3.fromValues(35, 35,7),
       vec3.fromValues(-35, -35, -3)
     )
 
@@ -58,13 +60,13 @@ export class MilestoneScene extends Scene {
   initialize_scene(){
 
     this.lights.push({
-      position : [5,5,7],
-      color: [0.9, 0.9, 0.9]
+      position : [5,5,10],
+      color: [0.4, 0.4, 0.4]
     });
 
     this.lights.push({
-      position : [0,0,7],
-      color: [0.9, 0.9, 0.9]
+      position: [0,0,10],
+      color: [0.4, 0.4, 0.4]
     });
 
     this.procedural_texture_generator.compute_texture(
@@ -161,7 +163,7 @@ export class MilestoneScene extends Scene {
       translation: [0, 0, 0],
       scale: [1., 1., 1.],
       mesh_reference: 'submarine.obj',
-      material: MATERIALS.diffuse('submarine.png')
+      material: MATERIALS.diffuse('submarine.png', false, false, null, [1, 1, 1])
     });
     
     

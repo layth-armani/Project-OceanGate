@@ -77,6 +77,9 @@ void main()
     float light_distance = length(light_position - v2f_frag_pos);
     float attenuation = 1.0 / pow(light_distance, 0.25);
 
+    //try attenuation as fixed for more realistic deep water scene
+    attenuation = 0.3;
+
     // Compute pixel color
     vec3 color = ambient + (attenuation * light_color * material_color * (diffuse + specular));
 
