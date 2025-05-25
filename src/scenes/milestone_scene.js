@@ -148,7 +148,7 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      200, 
+      500, 
       this.camera.get_boundary()
     );
     
@@ -161,7 +161,7 @@ export class MilestoneScene extends Scene {
 
     
     this.static_objects.push({
-      translation: [0, 0, 0],
+      translation: [0, 0, -4],
       scale: [1., 1., 1.],
       mesh_reference: 'submarine.obj',
       material: MATERIALS.diffuse('submarine.png', false, false, null, [1, 1, 1])
