@@ -5,7 +5,7 @@ import { terrain_build_mesh } from "../scene_resources/dendry_terrain_generation
 import { noise_functions } from "../render/shader_renderers/noise_sr.js"
 import { Scene } from "./scene.js"
 import { vec3 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
-import { create_button, create_slider, create_hotkey_action } from "../cg_libraries/cg_web.js"
+import { create_button, create_slider, create_hotkey_action, create_divider, create_header } from "../cg_libraries/cg_web.js"
 import { ResourceManager } from "../scene_resources/resource_manager.js"
 import { ProceduralTextureGenerator } from "../render/procedural_texture_generator.js"
 import { BoundedBox } from "../scene_resources/bounded_box.js"
@@ -39,8 +39,9 @@ export class MilestoneScene extends Scene {
     this.camera.set_pos(boundary.get_center())
     
     this.fish_rules = {
-      max_vel: 3, 
-      min_vel: 1, 
+      max_vel: 3,
+      max_acceleration: 3,
+      min_vel: 1,
       view_distance: 3, 
       avoidance_distance: 1.5, 
       alignment: 1.5, 
@@ -184,9 +185,6 @@ export class MilestoneScene extends Scene {
     this.objects = this.static_objects.concat(this.dynamic_objects);
 
 
-    
-
-
   }
 
   /**
@@ -197,7 +195,7 @@ export class MilestoneScene extends Scene {
     const boids = Object.keys(this.actors).filter((actor) => this.actors[actor].is_boid).map((actor) => this.actors[actor]);
     let i = 0;
 
-    const {max_vel, min_vel, view_distance, avoidance_distance, alignment, cohesion, separation, border, random_force, jitteryness} = this.fish_rules;
+    const {max_vel, min_vel, max_acceleration, view_distance, avoidance_distance, alignment, cohesion, separation, border, random_force, jitteryness} = this.fish_rules;
 
     for (const boid of boids) {
 
@@ -278,12 +276,12 @@ export class MilestoneScene extends Scene {
           vec3.scale(new_velocity, new_velocity, min_vel / speed);
         }
 
-        let max_velocity_change = max_vel * dt;
+        let max_accel = max_acceleration * dt;
 
         let velocity_change_vec = vec3.sub(vec3.create(), new_velocity, boid.velocity);
         let velocity_change_length = vec3.length(velocity_change_vec);
-        if (velocity_change_length > max_velocity_change) {
-          vec3.scale(velocity_change_vec, velocity_change_vec, max_velocity_change / velocity_change_length);
+        if (velocity_change_length > max_accel) {
+          vec3.scale(velocity_change_vec, velocity_change_vec, max_accel / velocity_change_length);
         }
 
         vec3.add(boid.velocity, boid.velocity, velocity_change_vec);
@@ -339,8 +337,7 @@ export class MilestoneScene extends Scene {
       (i) => {
       const new_sens = this.camera.MIN_ROT_SENSITIVITY + (i / n_steps_slider) * (this.camera.MAX_ROT_SENSITIVITY - this.camera.MIN_ROT_SENSITIVITY);
       this.camera.setRotSensitivity(new_sens);
-      },
-      1
+      }
     )
 
     create_hotkey_action("Bezier Animation", "o", () => {
@@ -370,7 +367,127 @@ export class MilestoneScene extends Scene {
         this.request_follow_fish = true;
       }
     });
+
+    create_divider();
+
+    create_header("fish settings");
+
+    create_slider(
+      "min velocity",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_min_vel = 0.5 + (i / n_steps_slider) * 3.5;
+        if(new_min_vel > this.fish_rules.max_vel){
+          return;
+        }
+        this.fish_rules.min_vel = new_min_vel;
+      }
+    )
+    
+    create_slider(
+      "max velocity",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_max_vel = 2 + (i / n_steps_slider) * 4;
+        if(new_max_vel < this.fish_rules.min_vel){
+          return;
+        }
+        this.fish_rules.max_vel = new_max_vel;
+      }
+    )
+
+    create_slider(
+      "max acceleration",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_max_acc = 2 + (i / n_steps_slider) * 18;
+
+        this.fish_rules.max_acceleration = new_max_acc;
+      }
+    )
+
+    create_slider(
+      "view distance",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_view_dist = 1 + (i / n_steps_slider) * 4;
+
+        this.fish_rules.view_distance = new_view_dist;
+      }
+    )
+
+    create_slider(
+      "avoidance distance",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_avoidance_dist = 0.5 + (i / n_steps_slider) * 2.5;
+
+        this.fish_rules.avoidance_distance = new_avoidance_dist;
+      }
+    )
+
+    create_slider(
+      "alignment force",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_alignment = 0.5 + (i / n_steps_slider) * 2.5;
+
+        this.fish_rules.alignment = new_alignment;
+      }
+    )
+
+    create_slider(
+      "cohesion force",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_cohesion = 0.02 + (i / n_steps_slider) * 0.28;
+
+        this.fish_rules.cohesion = new_cohesion;
+      }
+    )
+
+    create_slider(
+      "separation force",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_separation = 0.5 + (i / n_steps_slider) * 3.5;
+
+        this.fish_rules.separation = new_separation;
+      }
+    )
+
+    create_slider(
+      "border force",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_border = 1 + (i / n_steps_slider) * 99;
+
+        this.fish_rules.border = new_border;
+      }
+    )
+
+    create_slider(
+      "randomness force",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_random = 0.5 + (i / n_steps_slider) * 4.5;
+
+        this.fish_rules.random_force = new_random;
+      }
+    )
+
+    create_slider(
+      "jitteryness",
+      [0, n_steps_slider],  
+      (i) => {
+        const new_jitter = 0.01 + (i / n_steps_slider) * 0.98;
+
+        this.fish_rules.jitteryness = new_jitter;
+      }
+    )
   }
+
+  
 
   create_random_fish(objects, n_fish, bounds){
     const fish_rules = this.fish_rules;

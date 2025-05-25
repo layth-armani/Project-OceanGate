@@ -191,6 +191,19 @@ export function create_hotkey_action(title, key, action){
 	register_keyboard_action(key, () => action());
 }
 
+export function create_divider(){
+	const hr = document.createElement("hr");
+
+	overlay.appendChild(hr);
+}
+
+export function create_header(header){
+	const h = document.createElement("h3");
+	h.innerText = header
+	h.style.padding = "7px"
+
+	overlay.appendChild(h);
+}
 
 /**
  * Create a button on the overlay that trigger an action uppon clicking
