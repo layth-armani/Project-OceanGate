@@ -1,10 +1,12 @@
 import { vec2, vec3, vec4, mat3, mat4 } from "../../lib/gl-matrix_3.3.0/esm/index.js"
+import { forEach } from "../../lib/gl-matrix_3.3.0/esm/vec3.js";
+const Factorials = [1, 1];
 
 export class BezierCamAnimation{
 
   constructor(pos_points, look_points, duration){
-    if(!pos_points || pos_points.length != 4 || 
-      !look_points || look_points.length != 4){
+    if(!pos_points ||
+      !look_points || look_points.length != pos_points.length){
       throw new Error("Invalid camera or points");
     }
     this.pos_points = pos_points;
@@ -17,30 +19,22 @@ export class BezierCamAnimation{
   }
 
   is_animation_finished(){
-    return this.t >= 1;
+    return this.t > 0.99;
   }
 
   get_current(points){
-    const p0 = vec3.clone(points[0]);
-    const p1 = vec3.clone(points[1]);
-    const p2 = vec3.clone(points[2]);
-    const p3 = vec3.clone(points[3]);
+    let p = vec3.fromValues(0, 0, 0);
+    const n = points.length - 1;
+    for (let k = 0; k <= n; k++) {
+      const p_i = vec3.clone(points[k]);
+      const s_i =  C(n,k) * Math.pow(1 - this.t, n-k) * Math.pow(this.t, k);
 
-    const s0 = Math.pow(1 - this.t, 3);
-    const s1 = 3 * Math.pow(1 - this.t, 2) * this.t;
-    const s2 = 3 * (1 - this.t) * Math.pow(this.t, 2);
-    const s3 = Math.pow(this.t, 3);
+      vec3.scale(p_i, p_i, s_i);
 
-    vec3.scale(p0, p0, s0);
-    vec3.scale(p1, p1, s1);
-    vec3.scale(p2, p2, s2);
-    vec3.scale(p3, p3, s3);
+      vec3.add(p, p, p_i);
+    }
 
-    vec3.add(p0, p0, p1);
-    vec3.add(p0, p0, p2);
-    vec3.add(p0, p0, p3);
-
-    return p0;
+    return p;
   }
 
   update(dt){
@@ -55,4 +49,37 @@ export class BezierCamAnimation{
 
     return {pos: this.pos, look: this.look};
   }
+}
+
+
+function factorial(n) {
+  if (n < 0) {
+    console.error("Factorial is not defined for negative numbers.");
+    return -1;
+  }
+
+  if (Factorials[n] !== undefined) {
+    return Factorials[n];
+  }
+
+  for (let i = Factorials.length; i <= n; i++) {
+    Factorials[i] = Factorials[i - 1] * i;
+  }
+
+  return Factorials[n];
+}
+
+
+function C(n, k) {
+  if (k < 0 || k > n) {
+    return 0; 
+  }
+  if (k === 0 || k === n) {
+    return 1;
+  }
+  if (k > n / 2) {
+    k = n - k; 
+  }
+
+  return factorial(n) / (factorial(k) * factorial(n - k));
 }
