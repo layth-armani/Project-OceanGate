@@ -16,6 +16,7 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
             `blinn_phong.vert.glsl`, 
             `blinn_phong.frag.glsl`
         );
+        this.default_normal_map = this.regl.texture({ width: 1, height: 1, data: [128,128,255,255] });
 
         // override the pipeline to allow dynamic depth mask & blend enable based on props.is_translucent
         // override the pipeline to allow dynamic depth mask & blend enable based on props.is_translucent
@@ -70,15 +71,9 @@ export class BlinnPhongShaderRenderer extends ShaderRenderer {
                 const apply_normal_map = obj.material.apply_normal_map;
                 
 
-                // default flat normal map if needed
-                let normal_map = this.regl.texture({ width: 1, height: 1, data: [128,128,255,255] });
+                let normal_map = this.default_normal_map;
                 if (apply_normal_map) {
-                    normal_map = obj.material.normal_map 
-                        ? this.resource_manager.get_texture(obj.material.normal_map)
-                        : this.#get_texture_from_array(
-                            this.#createFlatNormalMap(texture.width, texture.height),
-                            texture.width, texture.height
-                        );
+                    normal_map = this.resource_manager.get_texture(obj.material.normal_map)     
                 }
 
                 const { mat_model_view, mat_model_view_projection, mat_normals_model_view } = scene.camera.object_matrices.get(obj);
