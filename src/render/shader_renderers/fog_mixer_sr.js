@@ -1,8 +1,8 @@
 import { ShaderRenderer } from "./shader_renderer.js";
 
 export const FOG_MIN_DISTANCE = 10;
-export const FOG_MAX_DISTANCE = 70;
-export const FOG_DEFAULT_DISTANCE = 30;
+export const FOG_MAX_DISTANCE = 40;
+export const FOG_DEFAULT_DISTANCE = 20;
 
 export class FogMixerShaderRenderer extends ShaderRenderer {
 
