@@ -31,8 +31,8 @@ export class MilestoneScene extends Scene {
     this.request_follow_fish = false;
 
     const boundary = new BoundedBox(
-      vec3.fromValues(35, 35,7),
-      vec3.fromValues(-35, -35, -3)
+      vec3.fromValues(15, 15,7),
+      vec3.fromValues(-15, -15, -2)
     )
 
     this.camera.set_boundary(boundary);
@@ -149,7 +149,7 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      500, 
+      100, 
       this.camera.get_boundary()
     );
     
