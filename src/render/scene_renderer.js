@@ -168,10 +168,12 @@ export class SceneRenderer {
             // Render the shadows
             this.shadows.render(scene_state);
         })
+        
 
         this.render_in_texture("shadows_blurred", () =>{
             
-            this.big_blur.render(scene_state, this.texture("shadows"), true);
+            this.blur.render(scene_state, this.texture("shadows"), true);
+            //this.big_blur.render(scene_state, this.texture("shadows"), true);
         })
 
         this.render_in_texture("distances", () =>{

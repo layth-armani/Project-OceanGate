@@ -7,8 +7,8 @@ export class BigBlurShaderRenderer extends ShaderRenderer{
         super(
             regl,
             resource_manager,
-            `gaussian_blur.vert.glsl`,
-            `gaussian_blur.frag.glsl`
+            `big_gaussian_blur.vert.glsl`,
+            `big_gaussian_blur.frag.glsl`
         );
     }
 
@@ -19,7 +19,6 @@ export class BigBlurShaderRenderer extends ShaderRenderer{
         const inputs = [];
 
         for(const obj of scene.objects){
-            if(this.exclude_object(obj)) continue;
 
             const mesh = this.resource_manager.get_mesh(obj.mesh_reference);
             const texSize = [scene_state.frame.framebufferWidth, scene_state.frame.framebufferHeight];

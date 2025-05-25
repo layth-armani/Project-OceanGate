@@ -68,7 +68,7 @@ export class MilestoneScene extends Scene {
 
     this.create_random_fish(
       this.static_objects, 
-      300, 
+      100, 
       this.camera.get_boundary(),
       {max_vel: 3, min_vel: 1, view_distance: 3, avoidance_distance: 1.5, alignment: 1.5, cohesion: 0.1, separation: 1.5, border: 100}
     );
