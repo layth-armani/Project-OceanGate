@@ -19,6 +19,7 @@ export class POVCamera {
         this.movement_speed = this.MIN_MOV_SPEED;
 
         this.animation = null;
+        this.fish = null;
         
         this.mat = {
             projection : mat4.create(),
@@ -52,12 +53,24 @@ export class POVCamera {
         this.update_cam_transform();
     }
 
+    follow_fish(fish){
+        this.fish = fish;
+    }
+
+    unfollow_fish(){
+        this.fish = null;
+    }
+
+    get_fish(){
+        return this.fish;
+    }
+
     set_animation(animation){
         this.animation = animation;
     }
 
-    is_animation_ongoing(){
-        return this.animation != null;
+    is_externally_controlled(){
+        return this.animation != null || this.fish != null;
     }
 
     animate(dt){
@@ -70,6 +83,18 @@ export class POVCamera {
                 this.set_pos(pos);
                 this.set_look_dir(look);
             }
+        }else if(this.fish){
+            const forward_vec = vec3.normalize(vec3.create(), this.fish.velocity);
+            const right_vec = vec3.cross(vec3.create(), forward_vec, [0, 0, 1])
+            const up_vec = vec3.cross(vec3.create(), right_vec, forward_vec)
+            vec3.normalize(up_vec, up_vec);
+
+            const cam_pos = vec3.scale(vec3.create(), forward_vec, -4)
+            vec3.add(cam_pos, cam_pos, up_vec);
+            vec3.add(cam_pos, this.fish.translation, cam_pos)
+
+            this.set_pos(cam_pos);
+            this.set_look_dir(vec3.normalize(vec3.create(), this.fish.velocity))
         }
     }
 
