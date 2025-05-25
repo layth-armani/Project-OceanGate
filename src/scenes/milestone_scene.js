@@ -156,13 +156,13 @@ export class MilestoneScene extends Scene {
       material: MATERIALS.diffuse('deep_sea')
     });
 
-    /*
+    
     this.static_objects.push({
       translation: [0, 0, 0],
       scale: [1., 1., 1.],
       mesh_reference: 'submarine.obj',
       material: MATERIALS.diffuse('submarine.png')
-    });*/
+    });
     
     
     
@@ -432,7 +432,7 @@ function place_random_rocks(objects, terrain_mesh, TERRAIN_SCALE, terrain_transl
       translation: [...world_pos],
       scale: [scale_val, scale_val, scale_val],
       mesh_reference: "rock.obj",
-      material: MATERIALS.diffuse("rock"),
+      material: MATERIALS.gray,
     };
 
     objects.push(rock);
