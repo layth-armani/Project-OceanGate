@@ -140,6 +140,7 @@ export class ResourceManager{
             'fish.png',
             'night_sky.jpg',
             'submarine.png',
+            'sphere.obj'
           ];
     }
 
