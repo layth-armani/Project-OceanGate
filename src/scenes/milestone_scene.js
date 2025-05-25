@@ -383,7 +383,34 @@ export class MilestoneScene extends Scene {
             vec3.fromValues(0.75, 0.64, -0.12),
             vec3.fromValues(0.7212364315453622, 0.6823402596605966, -0.11928864094297406),
           ],
-          6.5
+          8
+        )
+      )
+    });
+
+
+    create_hotkey_action("Bezier Animation", "3", () => {
+      this.camera.set_animation(
+        new BezierCamAnimation(
+          [
+            vec3.fromValues(0, 11, -2),
+
+            vec3.fromValues(-20, 3, 3),
+            vec3.fromValues(0, -30, 6),
+            vec3.fromValues(20, 3, 3),
+
+            vec3.fromValues(0, 11, -2),
+          ],
+          [
+            vec3.fromValues(0, -1, 0),
+
+            vec3.fromValues(0.9165707348973663, 0.4, -0.3),
+            vec3.fromValues(-0.01549348537948082, 0.8066988330402917, -0.4),
+            vec3.fromValues(-0.8696065429838772, 0.4, -0.3),
+
+            vec3.fromValues(0, -1, 0),
+          ],
+          8
         )
       )
     });
