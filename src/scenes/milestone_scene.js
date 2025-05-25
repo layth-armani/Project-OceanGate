@@ -169,8 +169,8 @@ export class MilestoneScene extends Scene {
     });
 
     this.static_objects.push({
-      translation: [8, 8, -4],
-      scale: [0.8, 0.8, 0.8],
+      translation: [0, 0.7, -2.8],
+      scale: [0.1, 0.1, 0.1],
       mesh_reference: 'sphere.obj',
       material: MATERIALS.gold,
       properties: ["extra_bloom"]
