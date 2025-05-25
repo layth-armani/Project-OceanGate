@@ -140,7 +140,7 @@ export class ResourceManager{
             'fish.png',
             'night_sky.jpg',
             'submarine.png',
-            'sphere.obj'
+            
           ];
     }
 
@@ -171,6 +171,7 @@ export class ResourceManager{
         "suzanne.obj",
         "submarine.obj",
         "rock.obj",
+        'sphere.obj'
       ];
     }
 
