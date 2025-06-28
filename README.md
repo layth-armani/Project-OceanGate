@@ -4,15 +4,15 @@ A **CS-341 Final Project** simulating an underwater environment inspired by *Sub
 
 ## Features
 
-* 🌫️ **Fog**: Post-processing based atmospheric attenuation for underwater depth perception.
-* 💡 **Bloom**: HDR-based glow effects using Gaussian blur and luminance thresholding.
-* 🐟 **Boids**: Schooling fish with smooth, flocking behavior and jitter randomness.
-* 🧭 **FPS Camera**: Free-roaming first-person camera with mouse-look and keyboard navigation.
-* 🧭 **Bezier Camera**: Cinematic fly-through animation using Bézier curves.
-* 🗺️ **2D Terrain Generation**: Procedural seabed using Perlin and dendry-inspired noise.
-* 🪨 **Normal Mapping**: Realistic surface detail using procedural textures.
-* 🛠️ **Modeling**: Custom Blender-made submarine, fish, and rocks.
-* 🪸 **Alpha Cutouts**: Coral-like decorations with alpha texture discard for performance.
+* **Fog**: Post-processing based atmospheric attenuation for underwater depth perception.
+* **Bloom**: HDR-based glow effects using Gaussian blur and luminance thresholding.
+* **Boids**: Schooling fish with smooth, flocking behavior and jitter randomness.
+* **FPS Camera**: Free-roaming first-person camera with mouse-look and keyboard navigation.
+* **Bezier Camera**: Cinematic fly-through animation using Bézier curves.
+* **2D Terrain Generation**: Procedural seabed using Perlin and dendry-inspired noise.
+* **Normal Mapping**: Realistic surface detail using procedural textures.
+* **Modeling**: Custom Blender-made submarine, fish, and rocks.
+* **Alpha Cutouts**: Coral-like decorations with alpha texture discard for performance.
 
 
 
